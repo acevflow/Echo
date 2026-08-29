@@ -8,14 +8,12 @@ Echo aims to provide a high-quality local music playback experience with a moder
 
 ## Features
 
-The following features are planned or currently being implemented:
+The following features are implemented:
 
-*   **Local Music Discovery**: Automatically scan and index audio files on the device.
-*   **Library Management**: Browse by songs, albums, artists, and genres.
-*   **Modern UI**: A clean interface following Material 3 guidelines.
-*   **Playback Controls**: Play, pause, skip, and seek functionality.
-*   **Queue Management**: Easily manage what plays next.
-*   **Dark & Light Themes**: Full support for system-wide theme preferences.
+*   **Local Music Discovery**: Automatically scans audio files on the device using the MediaStore API.
+*   **Modern UI**: A clean interface following Material 3 guidelines, displaying a reactive list of songs.
+*   **Permission Handling**: Automatically requests appropriate storage permissions based on the Android version (including Android 13+ support).
+*   **Clean Architecture**: Foundation established with separate data, domain, and UI layers.
 
 ## Screenshots
 
@@ -37,7 +35,7 @@ The following features are planned or currently being implemented:
 
 1.  Clone the repository:
     ```bash
-    git clone https://github.com/ChristianAceves/echo.git
+    git clone https://github.com/acevflow/Echo.git
     ```
 2.  Open the project in Android Studio.
 3.  Sync the project with Gradle files.
@@ -47,24 +45,28 @@ The following features are planned or currently being implemented:
 
 ### Project Structure
 
-The project follows a standard Android multi-module structure (currently a single `:app` module):
+The project follows a standard Android structure within the `:app` module:
 
-*   `app/`: The main application module containing the UI and business logic.
-    *   `src/main/java/com/acevflow/echo/`: Kotlin source files.
-    *   `src/main/res/`: Android resources.
-*   `gradle/`: Gradle configuration files and Version Catalog (`libs.versions.toml`).
+*   `app/src/main/java/com/acevflow/echo/`:
+    *   `data/`: Repository implementations and data sources (MediaStore).
+    *   `domain/`: Core data models and repository interfaces.
+    *   `di/`: Dependency injection configuration (Hilt).
+    *   `ui/`: Composable screens and ViewModels.
+*   `gradle/`: Version Catalog (`libs.versions.toml`) and wrapper configuration.
 
 ### Built With
 
 *   [Kotlin](https://kotlinlang.org/) - Programming language.
 *   [Jetpack Compose](https://developer.android.com/jetpack/compose) - Modern UI toolkit.
 *   [Material 3](https://m3.material.io/) - Design system.
+*   [Dagger Hilt](https://dagger.dev/hilt/) - Dependency injection.
+*   [KSP](https://github.com/google/ksp) - Kotlin Symbol Processing.
 *   [Gradle](https://gradle.org/) - Build system.
 
 ## Roadmap
 
-*   [ ] Local music discovery
-*   [ ] Music library browsing
+*   [x] Local music discovery
+*   [ ] Music library browsing (Albums/Artists)
 *   [ ] Basic playback engine
 *   [ ] Playback controls and notification
 *   [ ] Background playback support
