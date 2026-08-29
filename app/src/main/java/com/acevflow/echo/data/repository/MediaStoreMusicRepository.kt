@@ -2,6 +2,7 @@ package com.acevflow.echo.data.repository
 
 import android.content.ContentUris
 import android.content.Context
+import android.net.Uri
 import android.provider.MediaStore
 import com.acevflow.echo.domain.model.Song
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -25,7 +26,8 @@ class MediaStoreMusicRepository @Inject constructor(
             MediaStore.Audio.Media.TITLE,
             MediaStore.Audio.Media.ARTIST,
             MediaStore.Audio.Media.ALBUM,
-            MediaStore.Audio.Media.DURATION
+            MediaStore.Audio.Media.DURATION,
+            MediaStore.Audio.Media.ALBUM_ID
         )
         
         val selection = "${MediaStore.Audio.Media.IS_MUSIC} != 0"
@@ -43,6 +45,7 @@ class MediaStoreMusicRepository @Inject constructor(
             val artistColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST)
             val albumColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM)
             val durationColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION)
+            val albumIdColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID)
             
             while (cursor.moveToNext()) {
                 val id = cursor.getLong(idColumn)
@@ -50,12 +53,19 @@ class MediaStoreMusicRepository @Inject constructor(
                 val artist = cursor.getString(artistColumn) ?: "Unknown Artist"
                 val album = cursor.getString(albumColumn) ?: "Unknown Album"
                 val duration = cursor.getLong(durationColumn)
+                val albumId = cursor.getLong(albumIdColumn)
+                
                 val contentUri = ContentUris.withAppendedId(
                     MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                     id
                 )
                 
-                songs.add(Song(id, title, artist, album, duration, contentUri))
+                val artworkUri = ContentUris.withAppendedId(
+                    Uri.parse("content://media/external/audio/albumart"),
+                    albumId
+                )
+                
+                songs.add(Song(id, title, artist, album, duration, contentUri, artworkUri))
             }
         }
         emit(songs)

@@ -37,7 +37,7 @@ class MainActivity : ComponentActivity() {
                             MiniPlayer(
                                 viewModel = mainViewModel,
                                 onClick = {
-                                    // Navigate to full player screen in next milestone
+                                    navController.navigate(Screen.Player.route)
                                 }
                             )
                         }

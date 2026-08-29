@@ -49,6 +49,7 @@ class LibraryViewModel @Inject constructor(
                     .setTitle(song.title)
                     .setArtist(song.artist)
                     .setAlbumTitle(song.album)
+                    .setArtworkUri(song.artworkUri)
                     .build()
             )
             .build()

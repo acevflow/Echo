@@ -7,6 +7,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.acevflow.echo.ui.library.LibraryScreen
+import com.acevflow.echo.ui.player.PlayerScreen
+import com.acevflow.echo.ui.player.PlayerViewModel
 
 @Composable
 fun NavGraph(
@@ -21,6 +23,8 @@ fun NavGraph(
         composable(Screen.Library.route) {
             LibraryScreen(viewModel = hiltViewModel())
         }
-        // Player screen will be added in the next milestone
+        composable(Screen.Player.route) {
+            PlayerScreen(viewModel = hiltViewModel())
+        }
     }
 }
