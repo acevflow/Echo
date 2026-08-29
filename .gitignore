@@ -1,0 +1,33 @@
+# Built artifacts
+bin/
+gen/
+out/
+build/
+.gradle/
+
+# IDE files
+.idea/
+*.iml
+*.iws
+*.ipr
+.project
+.classpath
+.settings/
+.DS_Store
+
+# Local configuration
+local.properties
+.externalNativeBuild/
+.cxx/
+captures/
+
+# Signing files
+*.keystore
+*.jks
+*.p12
+
+# Logs and temporary files
+*.log
+*.tmp
+*.temp
+.kotlin/
