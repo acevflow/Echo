@@ -18,4 +18,6 @@ class PlayerViewModel @Inject constructor(
     fun play() = mediaControllerManager.resume()
     fun pause() = mediaControllerManager.pause()
     fun seekTo(position: Long) = mediaControllerManager.seekTo(position)
+    fun skipToNext() = mediaControllerManager.skipToNext()
+    fun skipToPrevious() = mediaControllerManager.skipToPrevious()
 }

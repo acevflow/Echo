@@ -40,21 +40,23 @@ class LibraryViewModel @Inject constructor(
         }
     }
 
-    fun playSong(song: Song) {
-        val mediaItem = MediaItem.Builder()
-            .setMediaId(song.id.toString())
-            .setUri(song.contentUri)
-            .setMediaMetadata(
-                MediaMetadata.Builder()
-                    .setTitle(song.title)
-                    .setArtist(song.artist)
-                    .setAlbumTitle(song.album)
-                    .setArtworkUri(song.artworkUri)
-                    .build()
-            )
-            .build()
+    fun playSongs(songs: List<Song>, startIndex: Int) {
+        val mediaItems = songs.map { song ->
+            MediaItem.Builder()
+                .setMediaId(song.id.toString())
+                .setUri(song.contentUri)
+                .setMediaMetadata(
+                    MediaMetadata.Builder()
+                        .setTitle(song.title)
+                        .setArtist(song.artist)
+                        .setAlbumTitle(song.album)
+                        .setArtworkUri(song.artworkUri)
+                        .build()
+                )
+                .build()
+        }
         
-        mediaControllerManager.playSong(mediaItem)
+        mediaControllerManager.setQueue(mediaItems, startIndex)
     }
 
     override fun onCleared() {

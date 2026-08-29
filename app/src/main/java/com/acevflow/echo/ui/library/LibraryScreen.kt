@@ -12,8 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Button
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -67,7 +66,9 @@ fun LibraryScreen(
             is LibraryUiState.Success -> {
                 SongList(
                     songs = state.songs,
-                    onSongClick = { viewModel.playSong(it) }
+                    onSongClick = { index -> 
+                        viewModel.playSongs(state.songs, index)
+                    }
                 )
             }
         }
@@ -77,17 +78,17 @@ fun LibraryScreen(
 @Composable
 fun SongList(
     songs: List<Song>,
-    onSongClick: (Song) -> Unit,
+    onSongClick: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
         modifier = modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp)
     ) {
-        items(songs, key = { it.id }) { song ->
+        itemsIndexed(songs, key = { _, song -> song.id }) { index, song ->
             SongItem(
                 song = song,
-                modifier = Modifier.clickable { onSongClick(song) }
+                modifier = Modifier.clickable { onSongClick(index) }
             )
             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
         }

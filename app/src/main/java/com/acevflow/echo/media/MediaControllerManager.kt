@@ -109,6 +109,14 @@ class MediaControllerManager @Inject constructor(
         }
     }
 
+    fun setQueue(mediaItems: List<MediaItem>, startIndex: Int) {
+        _controller.value?.run {
+            setMediaItems(mediaItems, startIndex, 0L)
+            prepare()
+            play()
+        }
+    }
+
     fun pause() {
         _controller.value?.pause()
     }
@@ -119,6 +127,14 @@ class MediaControllerManager @Inject constructor(
 
     fun seekTo(position: Long) {
         _controller.value?.seekTo(position)
+    }
+
+    fun skipToNext() {
+        _controller.value?.seekToNext()
+    }
+
+    fun skipToPrevious() {
+        _controller.value?.seekToPrevious()
     }
 
     fun release() {

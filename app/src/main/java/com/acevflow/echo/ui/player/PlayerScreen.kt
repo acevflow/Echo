@@ -127,7 +127,7 @@ fun PlayerScreen(
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(onClick = { /* Previous song in next milestone */ }) {
+            IconButton(onClick = { viewModel.skipToPrevious() }) {
                 Icon(
                     imageVector = Icons.Default.SkipPrevious,
                     contentDescription = "Previous",
@@ -149,7 +149,7 @@ fun PlayerScreen(
                 )
             }
 
-            IconButton(onClick = { /* Next song in next milestone */ }) {
+            IconButton(onClick = { viewModel.skipToNext() }) {
                 Icon(
                     imageVector = Icons.Default.SkipNext,
                     contentDescription = "Next",

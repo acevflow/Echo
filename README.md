@@ -15,6 +15,9 @@ The following features are implemented:
 *   **Full-screen Player**: A dedicated screen for detailed playback control and metadata display.
 *   **Background Playback**: Supported via a Foreground Service, allowing music to continue playing when the app is minimized.
 *   **Media Session Integration**: Enables system-level playback control and Bluetooth/peripheral support.
+*   **Queue Management**: Automatically manages a playback queue based on the current library view.
+*   **Skip Controls**: Fully functional "Next" and "Previous" controls in both the full player and system media UI.
+*   **Continuous Playback**: Automatically advances to the next song in the queue when a track ends.
 *   **Interactive Seeking**: Real-time progress tracking and scrubbing through tracks using an interactive slider.
 *   **Album Artwork**: High-quality artwork retrieval and display using Coil for both the player and library views.
 *   **In-App Controls**: A persistent **MiniPlayer** bar provides instant Play/Pause controls across the app.
@@ -90,11 +93,10 @@ The project follows a standard Android structure within the `:app` module:
 *   [x] Media session integration
 *   [x] Playback progress and seeking
 *   [x] Album artwork retrieval
-*   [ ] Queue management
+*   [x] Queue management & skip controls
 *   [ ] Shuffle and repeat modes
 *   [ ] Search functionality
 *   [ ] Favorites and Playlists
-*   [ ] Album artwork retrieval
 *   [ ] Customizable themes
 
 ## Contributing
