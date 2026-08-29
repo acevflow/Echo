@@ -4,6 +4,7 @@ import android.Manifest
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -64,7 +65,10 @@ fun LibraryScreen(
                 )
             }
             is LibraryUiState.Success -> {
-                SongList(songs = state.songs)
+                SongList(
+                    songs = state.songs,
+                    onSongClick = { viewModel.playSong(it) }
+                )
             }
         }
     }
@@ -73,6 +77,7 @@ fun LibraryScreen(
 @Composable
 fun SongList(
     songs: List<Song>,
+    onSongClick: (Song) -> Unit,
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
@@ -80,7 +85,10 @@ fun SongList(
         contentPadding = PaddingValues(16.dp)
     ) {
         items(songs, key = { it.id }) { song ->
-            SongItem(song = song)
+            SongItem(
+                song = song,
+                modifier = Modifier.clickable { onSongClick(song) }
+            )
             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
         }
     }

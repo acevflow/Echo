@@ -11,9 +11,12 @@ Echo aims to provide a high-quality local music playback experience with a moder
 The following features are implemented:
 
 *   **Local Music Discovery**: Automatically scans audio files on the device using the MediaStore API.
+*   **Audio Playback**: Core playback engine integrated using Jetpack Media3 (ExoPlayer).
+*   **Background Playback**: Supported via a Foreground Service, allowing music to continue playing when the app is minimized.
+*   **Media Session Integration**: Enables system-level playback control and future Bluetooth/Wear support.
 *   **Modern UI**: A clean interface following Material 3 guidelines, displaying a reactive list of songs.
-*   **Permission Handling**: Automatically requests appropriate storage permissions based on the Android version (including Android 13+ support).
-*   **Clean Architecture**: Foundation established with separate data, domain, and UI layers.
+*   **Permission Handling**: Automatically requests storage and notification permissions based on the Android version.
+*   **Clean Architecture**: Solid foundation with separate data, domain, media, and UI layers.
 
 ## Screenshots
 
@@ -51,6 +54,7 @@ The project follows a standard Android structure within the `:app` module:
     *   `data/`: Repository implementations and data sources (MediaStore).
     *   `domain/`: Core data models and repository interfaces.
     *   `di/`: Dependency injection configuration (Hilt).
+    *   `media/`: Media3 service implementation and session management.
     *   `ui/`: Composable screens and ViewModels.
 *   `gradle/`: Version Catalog (`libs.versions.toml`) and wrapper configuration.
 
@@ -59,6 +63,7 @@ The project follows a standard Android structure within the `:app` module:
 *   [Kotlin](https://kotlinlang.org/) - Programming language.
 *   [Jetpack Compose](https://developer.android.com/jetpack/compose) - Modern UI toolkit.
 *   [Material 3](https://m3.material.io/) - Design system.
+*   [Jetpack Media3](https://developer.android.com/guide/topics/media/media3) - Media playback and session APIs.
 *   [Dagger Hilt](https://dagger.dev/hilt/) - Dependency injection.
 *   [KSP](https://github.com/google/ksp) - Kotlin Symbol Processing.
 *   [Gradle](https://gradle.org/) - Build system.
@@ -67,10 +72,10 @@ The project follows a standard Android structure within the `:app` module:
 
 *   [x] Local music discovery
 *   [ ] Music library browsing (Albums/Artists)
-*   [ ] Basic playback engine
-*   [ ] Playback controls and notification
-*   [ ] Background playback support
-*   [ ] Media session integration
+*   [x] Basic playback engine
+*   [ ] Playback controls and notification UI
+*   [x] Background playback support
+*   [x] Media session integration
 *   [ ] Queue management
 *   [ ] Shuffle and repeat modes
 *   [ ] Search functionality
