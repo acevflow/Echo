@@ -10,6 +10,8 @@ Echo aims to provide a high-quality local music playback experience with a moder
 
 The following features are implemented:
 
+*   **Local Persistence**: Integrated Room database to persist user data and preferences.
+*   **Favorites Support**: Allows users to mark songs as favorites, with status synced across the entire UI.
 *   **Local Music Discovery**: Automatically scans audio files on the device using the MediaStore API.
 *   **Audio Playback**: Core playback engine integrated using Jetpack Media3 (ExoPlayer).
 *   **Full-screen Player**: A dedicated screen for detailed playback control and metadata display.
@@ -58,7 +60,9 @@ The following features are implemented:
 The project follows a standard Android structure within the `:app` module:
 
 *   `app/src/main/java/com/acevflow/echo/`:
-    *   `data/`: Repository implementations and data sources (MediaStore).
+    *   `data/`:
+        *   `local/`: Room database, DAOs, and entities.
+        *   `repository/`: Repository implementations (MediaStore & Local).
     *   `domain/`: Core data models and repository interfaces.
         *   `util/`: General utilities like time formatting.
     *   `di/`: Dependency injection configuration (Hilt).
@@ -76,6 +80,7 @@ The project follows a standard Android structure within the `:app` module:
 *   [Jetpack Compose](https://developer.android.com/jetpack/compose) - Modern UI toolkit.
 *   [Material 3](https://m3.material.io/) - Design system.
 *   [Jetpack Media3](https://developer.android.com/guide/topics/media/media3) - Media playback and session APIs.
+*   [Room Database](https://developer.android.com/training/data-storage/room) - Local data persistence.
 *   [Coil](https://coil-kt.github.io/coil/) - Asynchronous image loading.
 *   [Navigation Compose](https://developer.android.com/jetpack/compose/navigation) - Declarative navigation.
 *   [Dagger Hilt](https://dagger.dev/hilt/) - Dependency injection.
@@ -94,9 +99,10 @@ The project follows a standard Android structure within the `:app` module:
 *   [x] Playback progress and seeking
 *   [x] Album artwork retrieval
 *   [x] Queue management & skip controls
+*   [x] Favorites support
 *   [ ] Shuffle and repeat modes
 *   [ ] Search functionality
-*   [ ] Favorites and Playlists
+*   [ ] Playlists
 *   [ ] Customizable themes
 
 ## Contributing

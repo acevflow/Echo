@@ -4,19 +4,34 @@ import android.content.ContentUris
 import android.content.Context
 import android.net.Uri
 import android.provider.MediaStore
+import com.acevflow.echo.data.local.dao.FavoriteSongDao
+import com.acevflow.echo.data.local.entity.FavoriteSong
 import com.acevflow.echo.domain.model.Song
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import javax.inject.Inject
 
 class MediaStoreMusicRepository @Inject constructor(
-    @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
+    private val favoriteSongDao: FavoriteSongDao
 ) : MusicRepository {
 
-    override fun getSongs(): Flow<List<Song>> = flow {
+    override fun getSongs(): Flow<List<Song>> = combine(
+        getMediaStoreSongs(),
+        favoriteSongDao.getAllFavorites()
+    ) { mediaStoreSongs, favorites ->
+        val favoriteIds = favorites.map { it.songId }.toSet()
+        mediaStoreSongs.map { song ->
+            song.copy(isFavorite = favoriteIds.contains(song.id))
+        }
+    }.flowOn(Dispatchers.IO)
+
+    private fun getMediaStoreSongs(): Flow<List<Song>> = flow {
         val songs = mutableListOf<Song>()
         
         val collection = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
@@ -69,5 +84,16 @@ class MediaStoreMusicRepository @Inject constructor(
             }
         }
         emit(songs)
-    }.flowOn(Dispatchers.IO)
+    }
+
+    override fun isFavorite(songId: Long): Flow<Boolean> = favoriteSongDao.isFavorite(songId)
+
+    override suspend fun toggleFavorite(songId: Long) {
+        val isFavorite = favoriteSongDao.isFavorite(songId).first()
+        if (isFavorite) {
+            favoriteSongDao.deleteFavoriteById(songId)
+        } else {
+            favoriteSongDao.insertFavorite(FavoriteSong(songId))
+        }
+    }
 }

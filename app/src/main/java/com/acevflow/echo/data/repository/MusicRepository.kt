@@ -5,4 +5,6 @@ import kotlinx.coroutines.flow.Flow
 
 interface MusicRepository {
     fun getSongs(): Flow<List<Song>>
+    fun isFavorite(songId: Long): Flow<Boolean>
+    suspend fun toggleFavorite(songId: Long)
 }

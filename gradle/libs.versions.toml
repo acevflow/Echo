@@ -13,6 +13,7 @@ hilt = "2.60.1"
 hiltNavigationCompose = "1.4.0"
 navigationCompose = "2.10.0"
 coil = "2.7.0"
+room = "2.7.0-alpha13"
 lifecycleViewmodelCompose = "2.8.7"
 ksp = "2.2.10-2.0.2"
 
@@ -41,6 +42,9 @@ androidx-media3-ui = { group = "androidx.media3", name = "media3-ui", version.re
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
 androidx-compose-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
 coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
+androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
+androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
+androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
