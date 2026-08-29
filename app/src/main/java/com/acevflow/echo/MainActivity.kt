@@ -7,9 +7,15 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.acevflow.echo.ui.library.LibraryScreen
+import androidx.navigation.compose.rememberNavController
+import com.acevflow.echo.ui.MainViewModel
+import com.acevflow.echo.ui.components.MiniPlayer
+import com.acevflow.echo.ui.navigation.NavGraph
+import com.acevflow.echo.ui.navigation.Screen
 import com.acevflow.echo.ui.theme.EchoTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -20,9 +26,25 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             EchoTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    LibraryScreen(
-                        viewModel = hiltViewModel(),
+                val navController = rememberNavController()
+                val mainViewModel: MainViewModel = hiltViewModel()
+                val currentMediaItem by mainViewModel.currentMediaItem.collectAsState()
+
+                Scaffold(
+                    modifier = Modifier.fillMaxSize(),
+                    bottomBar = {
+                        if (currentMediaItem != null) {
+                            MiniPlayer(
+                                viewModel = mainViewModel,
+                                onClick = {
+                                    // Navigate to full player screen in next milestone
+                                }
+                            )
+                        }
+                    }
+                ) { innerPadding ->
+                    NavGraph(
+                        navController = navController,
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
