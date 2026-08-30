@@ -16,6 +16,9 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.PauseCircleFilled
 import androidx.compose.material.icons.filled.PlayCircleFilled
+import androidx.compose.material.icons.filled.Repeat
+import androidx.compose.material.icons.filled.RepeatOne
+import androidx.compose.material.icons.filled.Shuffle
 import androidx.compose.material.icons.filled.SkipNext
 import androidx.compose.material.icons.filled.SkipPrevious
 import androidx.compose.material3.Icon
@@ -38,6 +41,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.media3.common.Player
 import coil.compose.AsyncImage
 import com.acevflow.echo.domain.util.TimeFormatter
 
@@ -51,6 +55,8 @@ fun PlayerScreen(
     val playbackPosition by viewModel.playbackPosition.collectAsState()
     val duration by viewModel.duration.collectAsState()
     val isFavorite by viewModel.isFavorite.collectAsState()
+    val shuffleModeEnabled by viewModel.shuffleModeEnabled.collectAsState()
+    val repeatMode by viewModel.repeatMode.collectAsState()
 
     if (currentMediaItem == null) return
 
@@ -145,6 +151,14 @@ fun PlayerScreen(
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
+            IconButton(onClick = { viewModel.toggleShuffle() }) {
+                Icon(
+                    imageVector = Icons.Default.Shuffle,
+                    contentDescription = "Shuffle",
+                    tint = if (shuffleModeEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                )
+            }
+
             IconButton(onClick = { viewModel.skipToPrevious() }) {
                 Icon(
                     imageVector = Icons.Default.SkipPrevious,
@@ -172,6 +186,17 @@ fun PlayerScreen(
                     imageVector = Icons.Default.SkipNext,
                     contentDescription = "Next",
                     modifier = Modifier.size(48.dp)
+                )
+            }
+
+            IconButton(onClick = { viewModel.toggleRepeatMode() }) {
+                Icon(
+                    imageVector = when (repeatMode) {
+                        Player.REPEAT_MODE_ONE -> Icons.Default.RepeatOne
+                        else -> Icons.Default.Repeat
+                    },
+                    contentDescription = "Repeat",
+                    tint = if (repeatMode != Player.REPEAT_MODE_OFF) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
                 )
             }
         }

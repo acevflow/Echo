@@ -10,6 +10,8 @@ Echo aims to provide a high-quality local music playback experience with a moder
 
 The following features are implemented:
 
+*   **Playback Intelligence**: Support for **Shuffle** and **Repeat** modes (Off, All, One) with real-time UI synchronization.
+*   **Settings Persistence**: Integrated Jetpack DataStore to persist user preferences like playback modes across app restarts.
 *   **Library Hierarchy**: Organized browsing by **Songs**, **Albums**, and **Artists** with a dedicated navigation bar.
 *   **Detail Views**: Explore tracks within a specific album or view all albums from an artist.
 *   **Local Persistence**: Integrated Room database to persist user data and preferences.
@@ -64,7 +66,8 @@ The project follows a standard Android structure within the `:app` module:
 *   `app/src/main/java/com/acevflow/echo/`:
     *   `data/`:
         *   `local/`: Room database, DAOs, and entities.
-        *   `repository/`: Repository implementations (MediaStore & Local).
+        *   `preferences/`: DataStore implementation for app settings.
+        *   `repository/`: Repository implementations (MediaStore, Room, and DataStore).
     *   `domain/`: Core data models and repository interfaces.
         *   `util/`: General utilities like time formatting.
     *   `di/`: Dependency injection configuration (Hilt).
@@ -84,6 +87,7 @@ The project follows a standard Android structure within the `:app` module:
 *   [Material 3](https://m3.material.io/) - Design system.
 *   [Jetpack Media3](https://developer.android.com/guide/topics/media/media3) - Media playback and session APIs.
 *   [Room Database](https://developer.android.com/training/data-storage/room) - Local data persistence.
+*   [Jetpack DataStore](https://developer.android.com/topic/libraries/architecture/datastore) - Lightweight settings persistence.
 *   [Coil](https://coil-kt.github.io/coil/) - Asynchronous image loading.
 *   [Navigation Compose](https://developer.android.com/jetpack/compose/navigation) - Declarative navigation.
 *   [Dagger Hilt](https://dagger.dev/hilt/) - Dependency injection.
@@ -103,7 +107,7 @@ The project follows a standard Android structure within the `:app` module:
 *   [x] Album artwork retrieval
 *   [x] Queue management & skip controls
 *   [x] Favorites support
-*   [ ] Shuffle and repeat modes
+*   [x] Shuffle and repeat modes
 *   [ ] Search functionality
 *   [ ] Playlists
 *   [ ] Customizable themes

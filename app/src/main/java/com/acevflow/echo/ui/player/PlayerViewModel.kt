@@ -24,6 +24,8 @@ class PlayerViewModel @Inject constructor(
     val currentMediaItem = mediaControllerManager.currentMediaItem
     val playbackPosition = mediaControllerManager.playbackPosition
     val duration = mediaControllerManager.duration
+    val shuffleModeEnabled = mediaControllerManager.shuffleModeEnabled
+    val repeatMode = mediaControllerManager.repeatMode
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val isFavorite: StateFlow<Boolean> = currentMediaItem.flatMapLatest { mediaItem ->
@@ -40,6 +42,8 @@ class PlayerViewModel @Inject constructor(
     fun seekTo(position: Long) = mediaControllerManager.seekTo(position)
     fun skipToNext() = mediaControllerManager.skipToNext()
     fun skipToPrevious() = mediaControllerManager.skipToPrevious()
+    fun toggleShuffle() = mediaControllerManager.toggleShuffle()
+    fun toggleRepeatMode() = mediaControllerManager.toggleRepeatMode()
 
     fun toggleFavorite() {
         val songId = currentMediaItem.value?.mediaId?.toLongOrNull()

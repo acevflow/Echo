@@ -67,6 +67,9 @@ dependencies {
     // Image loading
     implementation(libs.coil.compose)
 
+    // DataStore
+    implementation(libs.androidx.datastore.preferences)
+
     // Room
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
