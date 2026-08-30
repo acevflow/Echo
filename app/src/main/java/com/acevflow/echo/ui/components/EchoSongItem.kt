@@ -1,6 +1,9 @@
 package com.acevflow.echo.ui.components
 
-import androidx.compose.foundation.clickable
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,6 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.DropdownMenu
@@ -18,6 +22,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -33,13 +38,18 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.acevflow.echo.domain.model.Song
+import com.acevflow.echo.ui.navigation.LocalNavAnimatedVisibilityScope
+import com.acevflow.echo.ui.navigation.LocalSharedTransitionScope
 import com.acevflow.echo.ui.theme.Dims
 import com.acevflow.echo.ui.theme.FavoriteRed
 
+@OptIn(ExperimentalFoundationApi::class, ExperimentalSharedTransitionApi::class)
 @Composable
 fun EchoSongItem(
     song: Song,
+    isSelected: Boolean = false,
     onClick: () -> Unit,
+    onLongClick: () -> Unit = {},
     onPlayNext: () -> Unit,
     onAddToQueue: () -> Unit,
     onAddToPlaylist: () -> Unit,
@@ -47,22 +57,55 @@ fun EchoSongItem(
     modifier: Modifier = Modifier
 ) {
     var showMenu by remember { mutableStateOf(false) }
+    val sharedTransitionScope = LocalSharedTransitionScope.current
+    val animatedVisibilityScope = LocalNavAnimatedVisibilityScope.current
 
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick)
+            .background(if (isSelected) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f) else MaterialTheme.colorScheme.background)
+            .combinedClickable(
+                onClick = onClick,
+                onLongClick = onLongClick
+            )
             .padding(horizontal = Dims.ElementPadding, vertical = Dims.SmallPadding),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        AsyncImage(
-            model = song.artworkUri,
-            contentDescription = null,
-            modifier = Modifier
+        Box(contentAlignment = Alignment.Center) {
+            val imageModifier = Modifier
                 .size(Dims.ArtworkSmall)
-                .clip(RoundedCornerShape(Dims.SmallRadius)),
-            contentScale = ContentScale.Crop
-        )
+                .clip(RoundedCornerShape(Dims.SmallRadius))
+            
+            AsyncImage(
+                model = song.artworkUri,
+                contentDescription = null,
+                modifier = if (sharedTransitionScope != null && animatedVisibilityScope != null) {
+                    with(sharedTransitionScope) {
+                        imageModifier.sharedBounds(
+                            rememberSharedContentState(key = "artwork_${song.id}"),
+                            animatedVisibilityScope = animatedVisibilityScope
+                        )
+                    }
+                } else imageModifier,
+                contentScale = ContentScale.Crop
+            )
+            
+            if (isSelected) {
+                Surface(
+                    modifier = Modifier
+                        .size(Dims.ArtworkSmall)
+                        .clip(RoundedCornerShape(Dims.SmallRadius)),
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Check,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onPrimary,
+                        modifier = Modifier.padding(12.dp)
+                    )
+                }
+            }
+        }
 
         Spacer(modifier = Modifier.width(Dims.ElementPadding))
 

@@ -16,6 +16,7 @@ Echo is built from the ground up using Jetpack Compose and modern Android archit
 
 ### Library & Discovery
 *   **Hierarchical Browsing**: Organize your collection by **Songs**, **Albums**, **Artists**, or **Folders**.
+*   **Batch Management**: Efficiently manage your library with **Multi-Select** support and batch actions for playlists and the playback queue.
 *   **Smart Discovery**: Dynamic "Most Played" and "Recently Added" collections that adapt to your habits.
 *   **Instant Search**: Real-time filtering across your entire library with immediate playback support.
 *   **Search Intelligence**: Persistent **Search History** with interactive suggestions and one-tap filtering.
@@ -25,6 +26,7 @@ Echo is built from the ground up using Jetpack Compose and modern Android archit
 
 ### Advanced Customization
 *   **Adaptive UI**: Responsive layouts optimized for **Phones**, **Tablets**, and **Foldables** using Window Size Classes.
+*   **Visual Fluidity**: Premium experience with **Shared Element Transitions** that provide visual continuity during navigation.
 *   **Interactive Queue**: Manage upcoming tracks via a dedicated Bottom Sheet with **drag-and-drop reordering**.
 *   **Professional Audio**: Built-in **5-band Equalizer** with frequency adjustment and persistent audio profiles.
 *   **Automation**: Integrated **Sleep Timer** with customizable intervals to automatically stop playback.
@@ -60,7 +62,7 @@ For more detailed instructions, see the [Build & Installation guide](docs/build.
 - [**Permissions**](docs/permissions.md) - Information on required Android permissions and data access.
 
 ## Technical Stack
-*   **UI**: Jetpack Compose (Material 3 & Window Size Classes)
+*   **UI**: Jetpack Compose (Material 3, Window Size Classes & Shared Element Transitions)
 *   **Logic**: Kotlin Coroutines & Flow
 *   **DI**: Dagger Hilt
 *   **Database**: Room (Relational persistence)
@@ -72,12 +74,12 @@ For more detailed instructions, see the [Build & Installation guide](docs/build.
 ## Roadmap
 
 ### Next Release
-- [ ] **Visual Polish**: Shared element transitions and animated artwork effects.
 - [ ] **Metadata Refinement**: Batch tag editing and advanced album art search.
+- [ ] **Enhanced Widgets**: Multiple widget sizes and customizable shortcut actions.
 
 ### Future
 - [ ] **Wear OS Support**: Companion app for music control from your wrist.
-- [ ] **Enhanced Widgets**: Multiple widget sizes and customizable shortcut actions.
+- [ ] **Cloud Sync**: Optional, privacy-focused synchronization of playlists and favorites.
 
 ## Contributing
 

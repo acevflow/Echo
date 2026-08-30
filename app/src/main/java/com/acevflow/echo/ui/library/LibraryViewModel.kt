@@ -11,6 +11,9 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -19,6 +22,9 @@ class LibraryViewModel @Inject constructor(
     private val musicRepository: MusicRepository,
     private val mediaControllerManager: MediaControllerManager
 ) : ViewModel() {
+
+    private val _selectedSongIds = MutableStateFlow<Set<Long>>(emptySet())
+    val selectedSongIds: StateFlow<Set<Long>> = _selectedSongIds.asStateFlow()
 
     private val _uiState = MutableStateFlow<LibraryUiState>(LibraryUiState.Loading)
     val uiState: StateFlow<LibraryUiState> = _uiState.asStateFlow()
@@ -77,6 +83,39 @@ class LibraryViewModel @Inject constructor(
     fun addToQueue(song: Song) {
         val mediaItem = toMediaItem(song)
         mediaControllerManager.addToQueue(mediaItem)
+    }
+
+    fun toggleSelection(songId: Long) {
+        val current = _selectedSongIds.value
+        _selectedSongIds.value = if (current.contains(songId)) {
+            current - songId
+        } else {
+            current + songId
+        }
+    }
+
+    fun clearSelection() {
+        _selectedSongIds.value = emptySet()
+    }
+
+    fun addSelectedToQueue(allSongs: List<Song>) {
+        val selected = allSongs.filter { _selectedSongIds.value.contains(it.id) }
+        viewModelScope.launch {
+            selected.forEach { song ->
+                mediaControllerManager.addToQueue(toMediaItem(song))
+            }
+            clearSelection()
+        }
+    }
+
+    fun addSelectedToPlaylist(playlistId: Long, allSongs: List<Song>) {
+        val selectedIds = _selectedSongIds.value
+        viewModelScope.launch {
+            selectedIds.forEach { songId ->
+                musicRepository.addSongToPlaylist(playlistId, songId)
+            }
+            clearSelection()
+        }
     }
 
     private fun toMediaItem(song: Song): MediaItem {

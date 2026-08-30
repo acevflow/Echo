@@ -1,23 +1,24 @@
 package com.acevflow.echo.ui.player
 
+import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.QueueMusic
-import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.PauseCircleFilled
 import androidx.compose.material.icons.filled.PlayCircleFilled
 import androidx.compose.material.icons.filled.Repeat
@@ -52,15 +53,19 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.media3.common.Player
+import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.acevflow.echo.domain.util.TimeFormatter
 import com.acevflow.echo.ui.MainViewModel
+import com.acevflow.echo.ui.navigation.LocalNavAnimatedVisibilityScope
+import com.acevflow.echo.ui.navigation.LocalSharedTransitionScope
 import com.acevflow.echo.ui.queue.QueueSheet
+import com.acevflow.echo.ui.queue.QueueViewModel
 import com.acevflow.echo.ui.theme.Dims
 import com.acevflow.echo.ui.theme.FavoriteRed
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun PlayerScreen(
     viewModel: PlayerViewModel,
@@ -76,6 +81,9 @@ fun PlayerScreen(
     val shuffleModeEnabled by viewModel.shuffleModeEnabled.collectAsState()
     val repeatMode by viewModel.repeatMode.collectAsState()
     val sleepTimerMillis by mainViewModel.sleepTimerMillisLeft.collectAsState()
+
+    val sharedTransitionScope = LocalSharedTransitionScope.current
+    val animatedVisibilityScope = LocalNavAnimatedVisibilityScope.current
 
     var showQueueSheet by remember { mutableStateOf(false) }
     var showTimerMenu by remember { mutableStateOf(false) }
@@ -100,12 +108,11 @@ fun PlayerScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(onClick = onBack) {
+                IconButton(onClick = { showQueueSheet = true }) {
                     Icon(
-                        imageVector = Icons.Default.KeyboardArrowDown,
-                        contentDescription = "Minimize",
-                        tint = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.size(Dims.IconMedium)
+                        imageVector = Icons.AutoMirrored.Filled.QueueMusic,
+                        contentDescription = "Queue",
+                        tint = MaterialTheme.colorScheme.onSurface
                     )
                 }
                 
@@ -116,53 +123,40 @@ fun PlayerScreen(
                     fontWeight = FontWeight.Bold
                 )
 
-                Box {
-                    IconButton(onClick = { showTimerMenu = true }) {
-                        Icon(
-                            imageVector = Icons.Default.Timer,
-                            contentDescription = "Sleep Timer",
-                            tint = if (sleepTimerMillis != null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
-                        )
-                    }
-                    DropdownMenu(
-                        expanded = showTimerMenu,
-                        onDismissRequest = { showTimerMenu = false }
-                    ) {
-                        if (sleepTimerMillis != null) {
-                            DropdownMenuItem(
-                                text = { Text("Cancel Timer (${TimeFormatter.formatMs(sleepTimerMillis!!)})") },
-                                onClick = {
-                                    mainViewModel.cancelSleepTimer()
-                                    showTimerMenu = false
-                                }
-                            )
-                        }
-                        listOf(15, 30, 45, 60).forEach { mins ->
-                            DropdownMenuItem(
-                                text = { Text("$mins minutes") },
-                                onClick = {
-                                    mainViewModel.startSleepTimer(mins)
-                                    showTimerMenu = false
-                                }
-                            )
-                        }
-                    }
+                IconButton(onClick = onBack) {
+                    Icon(
+                        imageVector = Icons.Default.KeyboardArrowDown,
+                        contentDescription = "Minimize",
+                        tint = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.size(Dims.IconMedium)
+                    )
                 }
             }
 
             Spacer(modifier = Modifier.weight(0.5f))
 
             // Artwork
-            AsyncImage(
-                model = currentMediaItem?.mediaMetadata?.artworkUri,
-                contentDescription = null,
-                modifier = Modifier
-                    .fillMaxWidth(0.9f)
-                    .aspectRatio(1f)
-                    .shadow(16.dp, RoundedCornerShape(Dims.CardRadius))
-                    .clip(RoundedCornerShape(Dims.CardRadius)),
-                contentScale = ContentScale.Crop
-            )
+            val imageModifier = Modifier
+                .fillMaxWidth(0.9f)
+                .aspectRatio(1f)
+                .shadow(16.dp, RoundedCornerShape(Dims.CardRadius))
+                .clip(RoundedCornerShape(Dims.CardRadius))
+
+            Box {
+                AsyncImage(
+                    model = currentMediaItem?.mediaMetadata?.artworkUri,
+                    contentDescription = null,
+                    modifier = if (sharedTransitionScope != null && animatedVisibilityScope != null) {
+                        with(sharedTransitionScope) {
+                            imageModifier.sharedBounds(
+                                rememberSharedContentState(key = "artwork_${currentMediaItem?.mediaId}"),
+                                animatedVisibilityScope = animatedVisibilityScope
+                            )
+                        }
+                    } else imageModifier,
+                    contentScale = ContentScale.Crop
+                )
+            }
 
             Spacer(modifier = Modifier.weight(1f))
 
@@ -292,26 +286,50 @@ fun PlayerScreen(
                     }
                 }
 
-                IconButton(onClick = { viewModel.toggleRepeatMode() }) {
-                    Icon(
-                        imageVector = when (repeatMode) {
-                            Player.REPEAT_MODE_ONE -> Icons.Default.RepeatOne
-                            else -> Icons.Default.Repeat
-                        },
-                        contentDescription = "Repeat",
-                        tint = if (repeatMode != Player.REPEAT_MODE_OFF) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                Box {
+                    IconButton(onClick = { showTimerMenu = true }) {
+                        Icon(
+                            imageVector = Icons.Default.Timer,
+                            contentDescription = "Sleep Timer",
+                            tint = if (sleepTimerMillis != null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    DropdownMenu(
+                        expanded = showTimerMenu,
+                        onDismissRequest = { showTimerMenu = false }
+                    ) {
+                        if (sleepTimerMillis != null) {
+                            DropdownMenuItem(
+                                text = { Text("Cancel Timer (${TimeFormatter.formatMs(sleepTimerMillis!!)})") },
+                                onClick = {
+                                    mainViewModel.cancelSleepTimer()
+                                    showTimerMenu = false
+                                }
+                            )
+                        }
+                        listOf(15, 30, 45, 60).forEach { mins ->
+                            DropdownMenuItem(
+                                text = { Text("$mins minutes") },
+                                onClick = {
+                                    mainViewModel.startSleepTimer(mins)
+                                    showTimerMenu = false
+                                }
+                            )
+                        }
+                    }
                 }
             }
 
             Spacer(modifier = Modifier.weight(0.5f))
 
-            IconButton(onClick = { showQueueSheet = true }) {
+            IconButton(onClick = { viewModel.toggleRepeatMode() }) {
                 Icon(
-                    imageVector = Icons.AutoMirrored.Filled.QueueMusic,
-                    contentDescription = "Show Queue",
-                    modifier = Modifier.size(Dims.IconMedium),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    imageVector = when (repeatMode) {
+                        Player.REPEAT_MODE_ONE -> Icons.Default.RepeatOne
+                        else -> Icons.Default.Repeat
+                    },
+                    contentDescription = "Repeat",
+                    tint = if (repeatMode != Player.REPEAT_MODE_OFF) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }

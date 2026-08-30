@@ -1,5 +1,7 @@
 package com.acevflow.echo.ui.components
 
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,7 +20,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -34,18 +35,23 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.acevflow.echo.ui.MainViewModel
+import com.acevflow.echo.ui.navigation.LocalSharedTransitionScope
 import com.acevflow.echo.ui.theme.Dims
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun MiniPlayer(
     viewModel: MainViewModel,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    animatedVisibilityScope: AnimatedVisibilityScope? = null
 ) {
     val currentMediaItem by viewModel.currentMediaItem.collectAsState()
     val isPlaying by viewModel.isPlaying.collectAsState()
     val position by viewModel.playbackPosition.collectAsState()
     val duration by viewModel.duration.collectAsState()
+    
+    val sharedTransitionScope = LocalSharedTransitionScope.current
     
     if (currentMediaItem == null) return
 
@@ -69,14 +75,25 @@ fun MiniPlayer(
                     .height(Dims.MiniPlayerHeight - 12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                AsyncImage(
-                    model = currentMediaItem?.mediaMetadata?.artworkUri,
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(48.dp)
-                        .clip(RoundedCornerShape(Dims.SmallRadius)),
-                    contentScale = ContentScale.Crop
-                )
+                val imageModifier = Modifier
+                    .size(48.dp)
+                    .clip(RoundedCornerShape(Dims.SmallRadius))
+
+                Box {
+                    AsyncImage(
+                        model = currentMediaItem?.mediaMetadata?.artworkUri,
+                        contentDescription = null,
+                        modifier = if (sharedTransitionScope != null && animatedVisibilityScope != null) {
+                            with(sharedTransitionScope) {
+                                imageModifier.sharedBounds(
+                                    rememberSharedContentState(key = "artwork_${currentMediaItem?.mediaId}"),
+                                    animatedVisibilityScope = animatedVisibilityScope
+                                )
+                            }
+                        } else imageModifier,
+                        contentScale = ContentScale.Crop
+                    )
+                }
                 
                 Spacer(modifier = Modifier.width(Dims.ElementPadding))
 

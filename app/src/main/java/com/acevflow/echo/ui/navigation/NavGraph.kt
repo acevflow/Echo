@@ -1,6 +1,10 @@
 package com.acevflow.echo.ui.navigation
 
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
@@ -25,6 +29,9 @@ import com.acevflow.echo.ui.player.PlayerScreen
 import com.acevflow.echo.ui.player.PlayerViewModel
 import com.acevflow.echo.ui.search.SearchScreen
 
+val LocalSharedTransitionScope = compositionLocalOf<SharedTransitionScope?> { null }
+val LocalNavAnimatedVisibilityScope = compositionLocalOf<androidx.compose.animation.AnimatedVisibilityScope?> { null }
+
 @Composable
 fun NavGraph(
     navController: NavHostController,
@@ -36,28 +43,34 @@ fun NavGraph(
         modifier = modifier
     ) {
         composable(Screen.Songs.route) {
-            LibraryScreen(
-                viewModel = hiltViewModel(),
-                onNavigateToEdit = { songId ->
-                    navController.navigate(Screen.EditSong.createRoute(songId))
-                }
-            )
+            CompositionLocalProvider(LocalNavAnimatedVisibilityScope provides this) {
+                LibraryScreen(
+                    viewModel = hiltViewModel(),
+                    onNavigateToEdit = { songId ->
+                        navController.navigate(Screen.EditSong.createRoute(songId))
+                    }
+                )
+            }
         }
         composable(Screen.Albums.route) {
-            AlbumsScreen(
-                viewModel = hiltViewModel(),
-                onAlbumClick = { album ->
-                    navController.navigate(Screen.AlbumDetail.createRoute(album.id))
-                }
-            )
+            CompositionLocalProvider(LocalNavAnimatedVisibilityScope provides this) {
+                AlbumsScreen(
+                    viewModel = hiltViewModel(),
+                    onAlbumClick = { album ->
+                        navController.navigate(Screen.AlbumDetail.createRoute(album.id))
+                    }
+                )
+            }
         }
         composable(Screen.Artists.route) {
-            ArtistsScreen(
-                viewModel = hiltViewModel(),
-                onArtistClick = { artist ->
-                    navController.navigate(Screen.ArtistDetail.createRoute(artist.name))
-                }
-            )
+            CompositionLocalProvider(LocalNavAnimatedVisibilityScope provides this) {
+                ArtistsScreen(
+                    viewModel = hiltViewModel(),
+                    onArtistClick = { artist ->
+                        navController.navigate(Screen.ArtistDetail.createRoute(artist.name))
+                    }
+                )
+            }
         }
         composable(Screen.Folders.route) {
             FoldersScreen(
@@ -76,26 +89,30 @@ fun NavGraph(
             )
         }
         composable(Screen.Recent.route) {
-            RecentScreen(
-                viewModel = hiltViewModel(),
-                onNavigateToEdit = { songId ->
-                    navController.navigate(Screen.EditSong.createRoute(songId))
-                }
-            )
+            CompositionLocalProvider(LocalNavAnimatedVisibilityScope provides this) {
+                RecentScreen(
+                    viewModel = hiltViewModel(),
+                    onNavigateToEdit = { songId ->
+                        navController.navigate(Screen.EditSong.createRoute(songId))
+                    }
+                )
+            }
         }
         composable(Screen.Search.route) {
-            SearchScreen(
-                viewModel = hiltViewModel(),
-                onAlbumClick = { album ->
-                    navController.navigate(Screen.AlbumDetail.createRoute(album.id))
-                },
-                onArtistClick = { artist ->
-                    navController.navigate(Screen.ArtistDetail.createRoute(artist.name))
-                },
-                onNavigateToEdit = { songId ->
-                    navController.navigate(Screen.EditSong.createRoute(songId))
-                }
-            )
+            CompositionLocalProvider(LocalNavAnimatedVisibilityScope provides this) {
+                SearchScreen(
+                    viewModel = hiltViewModel(),
+                    onAlbumClick = { album ->
+                        navController.navigate(Screen.AlbumDetail.createRoute(album.id))
+                    },
+                    onArtistClick = { artist ->
+                        navController.navigate(Screen.ArtistDetail.createRoute(artist.name))
+                    },
+                    onNavigateToEdit = { songId ->
+                        navController.navigate(Screen.EditSong.createRoute(songId))
+                    }
+                )
+            }
         }
         composable(Screen.Settings.route) {
             SettingsScreen(
@@ -116,22 +133,26 @@ fun NavGraph(
             )
         }
         composable(Screen.Player.route) {
-            PlayerScreen(
-                viewModel = hiltViewModel(),
-                mainViewModel = hiltViewModel(),
-                onBack = { navController.popBackStack() }
-            )
+            CompositionLocalProvider(LocalNavAnimatedVisibilityScope provides this) {
+                PlayerScreen(
+                    viewModel = hiltViewModel(),
+                    mainViewModel = hiltViewModel(),
+                    onBack = { navController.popBackStack() }
+                )
+            }
         }
         composable(
             route = Screen.AlbumDetail.route,
             arguments = listOf(navArgument("albumId") { type = NavType.LongType })
         ) {
-            AlbumDetailScreen(
-                viewModel = hiltViewModel(),
-                onNavigateToEdit = { songId ->
-                    navController.navigate(Screen.EditSong.createRoute(songId))
-                }
-            )
+            CompositionLocalProvider(LocalNavAnimatedVisibilityScope provides this) {
+                AlbumDetailScreen(
+                    viewModel = hiltViewModel(),
+                    onNavigateToEdit = { songId ->
+                        navController.navigate(Screen.EditSong.createRoute(songId))
+                    }
+                )
+            }
         }
         composable(
             route = Screen.ArtistDetail.route,
@@ -148,23 +169,27 @@ fun NavGraph(
             route = Screen.PlaylistDetail.route,
             arguments = listOf(navArgument("playlistId") { type = NavType.LongType })
         ) {
-            PlaylistDetailScreen(
-                viewModel = hiltViewModel(),
-                onNavigateToEdit = { songId ->
-                    navController.navigate(Screen.EditSong.createRoute(songId))
-                }
-            )
+            CompositionLocalProvider(LocalNavAnimatedVisibilityScope provides this) {
+                PlaylistDetailScreen(
+                    viewModel = hiltViewModel(),
+                    onNavigateToEdit = { songId ->
+                        navController.navigate(Screen.EditSong.createRoute(songId))
+                    }
+                )
+            }
         }
         composable(
             route = Screen.FolderDetail.route,
             arguments = listOf(navArgument("folderPath") { type = NavType.StringType })
         ) {
-            FolderDetailScreen(
-                viewModel = hiltViewModel(),
-                onNavigateToEdit = { songId ->
-                    navController.navigate(Screen.EditSong.createRoute(songId))
-                }
-            )
+            CompositionLocalProvider(LocalNavAnimatedVisibilityScope provides this) {
+                FolderDetailScreen(
+                    viewModel = hiltViewModel(),
+                    onNavigateToEdit = { songId ->
+                        navController.navigate(Screen.EditSong.createRoute(songId))
+                    }
+                )
+            }
         }
     }
 }
