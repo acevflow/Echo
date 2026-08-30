@@ -14,6 +14,7 @@ class SettingsViewModel @Inject constructor(
 
     val themeMode = preferencesRepository.themeMode
     val dynamicColorEnabled = preferencesRepository.dynamicColorEnabled
+    val crossfadeDuration = preferencesRepository.crossfadeDuration
 
     fun setThemeMode(mode: Int) {
         viewModelScope.launch {
@@ -24,6 +25,12 @@ class SettingsViewModel @Inject constructor(
     fun setDynamicColorEnabled(enabled: Boolean) {
         viewModelScope.launch {
             preferencesRepository.setDynamicColorEnabled(enabled)
+        }
+    }
+
+    fun setCrossfadeDuration(duration: Int) {
+        viewModelScope.launch {
+            preferencesRepository.setCrossfadeDuration(duration)
         }
     }
 }

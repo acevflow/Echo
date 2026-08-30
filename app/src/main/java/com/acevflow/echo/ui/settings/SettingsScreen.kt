@@ -11,12 +11,16 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
@@ -32,6 +36,7 @@ fun SettingsScreen(
 ) {
     val themeMode by viewModel.themeMode.collectAsState(initial = 0)
     val dynamicColorEnabled by viewModel.dynamicColorEnabled.collectAsState(initial = true)
+    val crossfadeDuration by viewModel.crossfadeDuration.collectAsState(initial = 0)
 
     Surface(
         modifier = modifier.fillMaxSize(),
@@ -120,6 +125,30 @@ fun SettingsScreen(
                     }
                 }
             }
+
+            Spacer(modifier = Modifier.padding(vertical = Dims.SmallPadding))
+
+            Text(
+                text = "Cross-fade Duration (${crossfadeDuration}s)",
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(bottom = Dims.SmallPadding)
+            )
+
+            var sliderValue by remember(crossfadeDuration) { mutableFloatStateOf(crossfadeDuration.toFloat()) }
+            Slider(
+                value = sliderValue,
+                onValueChange = { sliderValue = it },
+                onValueChangeFinished = {
+                    viewModel.setCrossfadeDuration(sliderValue.toInt())
+                },
+                valueRange = 0f..10f,
+                steps = 9
+            )
+            Text(
+                text = if (crossfadeDuration == 0) "Gapless playback only" else "Overlap tracks by ${crossfadeDuration} seconds",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }

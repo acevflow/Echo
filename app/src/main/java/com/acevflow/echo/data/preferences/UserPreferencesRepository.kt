@@ -22,6 +22,7 @@ class UserPreferencesRepository @Inject constructor(
         val DYNAMIC_COLOR_ENABLED = booleanPreferencesKey("dynamic_color_enabled")
         val EQUALIZER_ENABLED = booleanPreferencesKey("equalizer_enabled")
         val EQUALIZER_BANDS = stringPreferencesKey("equalizer_bands") // Format: "band0:gain0,band1:gain1..."
+        val CROSSFADE_DURATION = intPreferencesKey("crossfade_duration") // In seconds
     }
 
     val shuffleModeEnabled: Flow<Boolean> = dataStore.data.map { preferences ->
@@ -53,6 +54,10 @@ class UserPreferencesRepository @Inject constructor(
                 if (parts.size == 2) parts[0].toInt() to parts[1].toInt() else null
             }.toMap()
         }
+    }
+
+    val crossfadeDuration: Flow<Int> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.CROSSFADE_DURATION] ?: 0 // Default 0 (disabled)
     }
 
     suspend fun setShuffleModeEnabled(enabled: Boolean) {
@@ -96,6 +101,12 @@ class UserPreferencesRepository @Inject constructor(
 
             bandsMap[band] = gain
             preferences[PreferencesKeys.EQUALIZER_BANDS] = bandsMap.entries.joinToString(",") { "${it.key}:${it.value}" }
+        }
+    }
+
+    suspend fun setCrossfadeDuration(duration: Int) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.CROSSFADE_DURATION] = duration
         }
     }
 }

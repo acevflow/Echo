@@ -7,17 +7,23 @@ import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
 import com.acevflow.echo.data.repository.MusicRepository
 import com.acevflow.echo.data.preferences.UserPreferencesRepository
+import com.acevflow.echo.media.audio.VolumeController
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.milliseconds
 import javax.inject.Inject
 
 /**
@@ -36,6 +42,8 @@ class PlaybackService : MediaSessionService() {
     private var mediaSession: MediaSession? = null
     private var equalizer: Equalizer? = null
     private val serviceScope = CoroutineScope(Dispatchers.Main + Job())
+    private lateinit var volumeController: VolumeController
+    private var crossfadeJob: Job? = null
 
     private val playerListener = object : Player.Listener {
         override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
@@ -44,13 +52,27 @@ class PlaybackService : MediaSessionService() {
                     musicRepository.addSongToHistory(songId)
                 }
             }
+            
+            // Start fading in on every new item
+            mediaSession?.player?.let {
+                volumeController.fadeIn(it, 500)
+            }
         }
     }
 
     @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
     override fun onCreate() {
         super.onCreate()
+        
+        volumeController = VolumeController(serviceScope)
+        
+        val loadControl = DefaultLoadControl.Builder()
+            .setBufferDurationsMs(30000, 60000, 2500, 5000)
+            .setBackBuffer(5000, true)
+            .build()
+
         val player = ExoPlayer.Builder(this)
+            .setLoadControl(loadControl)
             .setAudioAttributes(
                 AudioAttributes.Builder()
                     .setContentType(C.AUDIO_CONTENT_TYPE_MUSIC)
@@ -65,6 +87,29 @@ class PlaybackService : MediaSessionService() {
         applyEqualizer(player.audioSessionId)
 
         mediaSession = MediaSession.Builder(this, player).build()
+        
+        startCrossfadeMonitor(player)
+    }
+
+    private fun startCrossfadeMonitor(player: Player) {
+        crossfadeJob?.cancel()
+        crossfadeJob = serviceScope.launch {
+            while (isActive) {
+                delay(500.milliseconds)
+                val duration = player.duration
+                val position = player.currentPosition
+                val crossfadeSeconds = preferencesRepository.crossfadeDuration.first()
+                
+                if (crossfadeSeconds > 0 && duration > 0 && (duration - position) <= (crossfadeSeconds * 1000L)) {
+                    if (player.hasNextMediaItem()) {
+                        volumeController.fadeOutAndPause(player, (crossfadeSeconds * 1000L))
+                        delay(crossfadeSeconds.toLong() * 1000L)
+                        player.seekToNext()
+                        player.play()
+                    }
+                }
+            }
+        }
     }
 
     private fun applyEqualizer(audioSessionId: Int) {

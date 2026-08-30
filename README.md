@@ -10,6 +10,7 @@ Echo is built from the ground up using Jetpack Compose and modern Android archit
 
 ### Core Playback
 *   **High-Fidelity Audio**: Powered by Jetpack Media3 (ExoPlayer) for reliable background playback.
+*   **Seamless Transitions**: Support for **True Gapless Playback** and customizable **Cross-fade** duration.
 *   **Media Session Integration**: Full support for system-level controls, Bluetooth peripherals, and Android Auto.
 *   **Interactive Controls**: Precision seeking, volume management, and instant skip controls.
 
@@ -71,12 +72,12 @@ For more detailed instructions, see the [Build & Installation guide](docs/build.
 ## Roadmap
 
 ### Next Release
-- [ ] **Advanced Audio Transitions**: Implementation of true gapless playback and cross-fade support.
-- [ ] **Wear OS Support**: Companion app for music control from your wrist.
+- [ ] **Visual Polish**: Shared element transitions and animated artwork effects.
+- [ ] **Metadata Refinement**: Batch tag editing and advanced album art search.
 
 ### Future
+- [ ] **Wear OS Support**: Companion app for music control from your wrist.
 - [ ] **Enhanced Widgets**: Multiple widget sizes and customizable shortcut actions.
-- [ ] **Cloud Sync**: Optional, privacy-focused synchronization of playlists and favorites.
 
 ## Contributing
 
