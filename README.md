@@ -6,12 +6,11 @@ A modern, high-performance local music player for Android. Echo provides a clean
 
 Echo is built from the ground up using Jetpack Compose and modern Android architecture. It aims to be a focused alternative to bloated media players, offering robust library management and professional audio customization without unnecessary tracking or cloud dependencies.
 
-## Features
+## Features (v1.0.0)
 
 ### Core Playback
 *   **High-Fidelity Audio**: Powered by Jetpack Media3 (ExoPlayer) for reliable background playback.
 *   **Media Session Integration**: Full support for system-level controls, Bluetooth peripherals, and Android Auto.
-*   **Gapless-Ready Architecture**: Designed for continuous, uninterrupted listening.
 *   **Interactive Controls**: Precision seeking, volume management, and instant skip controls.
 
 ### Library & Discovery
@@ -61,6 +60,18 @@ Echo is developed with a strict adherence to **Clean Architecture** principles, 
 *   **Media**: Jetpack Media3 (Audio engine & Session)
 *   **Widget**: Jetpack Glance
 *   **Image Loading**: Coil
+
+## Roadmap
+
+### Next Release
+- [ ] **Advanced Audio Transitions**: Implementation of true gapless playback and cross-fade support.
+- [ ] **Adaptive UI**: Optimized layouts for large screens, tablets, and foldables using Window Size Classes.
+- [ ] **Search Refinement**: Persistent search history and improved filtering algorithms.
+
+### Future
+- [ ] **Metadata Editor**: In-app support for editing audio file tags and album art.
+- [ ] **Enhanced Widgets**: Multiple widget sizes and customizable shortcut actions.
+- [ ] **Wear OS Support**: Companion app for music control from your wrist.
 
 ## Contributing
 

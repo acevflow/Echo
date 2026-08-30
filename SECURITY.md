@@ -2,11 +2,13 @@
 
 ## Supported Versions
 
-As Echo is in its initial development phase, only the latest version of the application is currently supported for security updates.
+Only the latest stable release and the current development version are supported for security updates.
 
 | Version | Supported |
 | :--- | :--- |
+| Next development version | Yes |
 | 1.0.x | Yes |
+| < 1.0.0 | No |
 
 ## Reporting a Vulnerability
 
