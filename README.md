@@ -10,6 +10,8 @@ Echo aims to provide a high-quality local music playback experience with a moder
 
 The following features are implemented:
 
+*   **Interactive Queue**: View and manage upcoming tracks via a dedicated **Queue Bottom Sheet**; support for "Play Next" and "Add to Queue" actions.
+*   **Smart Collections**: Automated "Most Played" and "Recently Added" lists generated from your listening habits and device storage.
 *   **Listening History**: Automatically tracks recently played songs, allowing users to browse and clear their activity history.
 *   **Custom Playlists**: Create, manage, and play personalized song collections with full relational persistence.
 *   **Real-time Search**: Instant, library-wide search for songs, albums, and artists with immediate playback support.
@@ -81,6 +83,7 @@ The project follows a standard Android structure within the `:app` module:
         *   `playlists/`: Custom collection management.
         *   `search/`: Real-time filtering and discovery UI.
         *   `player/`: Full-screen playback interface.
+        *   `queue/`: Interactive playback queue management (Bottom Sheet).
         *   `details/`: Detail screens for Albums, Artists, and Playlists.
         *   `components/`: Shared UI elements like the MiniPlayer.
 *   `gradle/`: Version Catalog (`libs.versions.toml`) and wrapper configuration.
@@ -116,7 +119,8 @@ The project follows a standard Android structure within the `:app` module:
 *   [x] Search functionality
 *   [x] Custom playlists creation & management
 *   [x] Recently played history
-*   [ ] Smart collections (Most Played)
+*   [x] Smart collections (Most Played, Recently Added)
+*   [x] Advanced queue management (Play Next, Add to Queue)
 *   [ ] Customizable themes
 
 ## Contributing

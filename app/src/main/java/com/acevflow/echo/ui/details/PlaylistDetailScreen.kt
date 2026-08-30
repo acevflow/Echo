@@ -7,6 +7,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.acevflow.echo.ui.library.SongList
@@ -31,6 +32,7 @@ fun PlaylistDetailScreen(
             }
             is PlaylistDetailUiState.Success -> {
                 SongList(
+                    viewModel = hiltViewModel(),
                     songs = state.songs,
                     onSongClick = { index ->
                         viewModel.playSongs(state.songs, index)

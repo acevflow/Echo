@@ -27,4 +27,8 @@ interface MusicRepository {
     fun getRecentHistory(): Flow<List<Song>>
     suspend fun addSongToHistory(songId: Long)
     suspend fun clearHistory()
+
+    // Smart Collections
+    fun getRecentlyAdded(): Flow<List<Song>>
+    fun getMostPlayed(): Flow<List<Song>>
 }

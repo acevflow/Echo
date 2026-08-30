@@ -24,6 +24,8 @@ class LibraryViewModel @Inject constructor(
     val uiState: StateFlow<LibraryUiState> = _uiState.asStateFlow()
 
     val playlists = musicRepository.getPlaylists()
+    val recentlyAdded = musicRepository.getRecentlyAdded()
+    val mostPlayed = musicRepository.getMostPlayed()
 
     init {
         loadSongs()
@@ -65,6 +67,31 @@ class LibraryViewModel @Inject constructor(
         viewModelScope.launch {
             musicRepository.addSongToPlaylist(playlistId, songId)
         }
+    }
+
+    fun playNext(song: Song) {
+        val mediaItem = toMediaItem(song)
+        mediaControllerManager.playNext(mediaItem)
+    }
+
+    fun addToQueue(song: Song) {
+        val mediaItem = toMediaItem(song)
+        mediaControllerManager.addToQueue(mediaItem)
+    }
+
+    private fun toMediaItem(song: Song): MediaItem {
+        return MediaItem.Builder()
+            .setMediaId(song.id.toString())
+            .setUri(song.contentUri)
+            .setMediaMetadata(
+                MediaMetadata.Builder()
+                    .setTitle(song.title)
+                    .setArtist(song.artist)
+                    .setAlbumTitle(song.album)
+                    .setArtworkUri(song.artworkUri)
+                    .build()
+            )
+            .build()
     }
 }
 

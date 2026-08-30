@@ -85,6 +85,7 @@ fun LibraryScreen(
             }
             is LibraryUiState.Success -> {
                 SongList(
+                    viewModel = viewModel,
                     songs = state.songs,
                     onSongClick = { index -> 
                         viewModel.playSongs(state.songs, index)
@@ -111,6 +112,7 @@ fun LibraryScreen(
 
 @Composable
 fun SongList(
+    viewModel: LibraryViewModel,
     songs: List<Song>,
     onSongClick: (Int) -> Unit,
     onAddToPlaylist: (Song) -> Unit,
@@ -122,6 +124,7 @@ fun SongList(
     ) {
         itemsIndexed(songs, key = { _, song -> song.id }) { index, song ->
             SongItem(
+                viewModel = viewModel,
                 song = song,
                 onAddToPlaylist = { onAddToPlaylist(song) },
                 modifier = Modifier.clickable { onSongClick(index) }
@@ -133,6 +136,7 @@ fun SongList(
 
 @Composable
 fun SongItem(
+    viewModel: LibraryViewModel,
     song: Song,
     onAddToPlaylist: () -> Unit,
     modifier: Modifier = Modifier
@@ -180,6 +184,20 @@ fun SongItem(
                     text = { Text("Add to Playlist") },
                     onClick = {
                         onAddToPlaylist()
+                        showMenu = false
+                    }
+                )
+                DropdownMenuItem(
+                    text = { Text("Play Next") },
+                    onClick = {
+                        viewModel.playNext(song)
+                        showMenu = false
+                    }
+                )
+                DropdownMenuItem(
+                    text = { Text("Add to Queue") },
+                    onClick = {
+                        viewModel.addToQueue(song)
                         showMenu = false
                     }
                 )

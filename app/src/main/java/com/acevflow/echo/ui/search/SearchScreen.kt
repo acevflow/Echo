@@ -20,12 +20,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.acevflow.echo.domain.model.Album
 import com.acevflow.echo.domain.model.Artist
 import com.acevflow.echo.domain.model.Song
+import com.acevflow.echo.ui.library.LibraryViewModel
 import com.acevflow.echo.ui.library.SongItem
 import com.acevflow.echo.ui.library.albums.AlbumItem
 import com.acevflow.echo.ui.library.artists.ArtistItem
@@ -73,6 +75,7 @@ fun SearchScreen(
                 }
                 is SearchResults.Success -> {
                     SearchContent(
+                        viewModel = hiltViewModel(),
                         songs = results.songs,
                         albums = results.albums,
                         artists = results.artists,
@@ -88,6 +91,7 @@ fun SearchScreen(
 
 @Composable
 fun SearchContent(
+    viewModel: LibraryViewModel,
     songs: List<Song>,
     albums: List<Album>,
     artists: List<Artist>,
@@ -110,6 +114,7 @@ fun SearchContent(
             }
             items(songs, key = { "song_${it.id}" }) { song ->
                 SongItem(
+                    viewModel = viewModel,
                     song = song,
                     onAddToPlaylist = { /* Implementation for search could be added later */ },
                     modifier = Modifier

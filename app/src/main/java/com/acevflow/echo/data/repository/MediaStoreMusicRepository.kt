@@ -161,7 +161,34 @@ class MediaStoreMusicRepository @Inject constructor(
         emit(albums)
     }.flowOn(Dispatchers.IO)
 
-    private fun getMediaStoreSongs(selection: String?, selectionArgs: Array<String>? = null): Flow<List<Song>> = flow {
+    override fun getRecentlyAdded(): Flow<List<Song>> = combine(
+        getMediaStoreSongs(null, null, "${MediaStore.Audio.Media.DATE_ADDED} DESC"),
+        favoriteSongDao.getAllFavorites()
+    ) { mediaStoreSongs, favorites ->
+        val favoriteIds = favorites.map { it.songId }.toSet()
+        mediaStoreSongs.take(50).map { song ->
+            song.copy(isFavorite = favoriteIds.contains(song.id))
+        }
+    }.flowOn(Dispatchers.IO)
+
+    override fun getMostPlayed(): Flow<List<Song>> = combine(
+        historyDao.getRecentHistory(),
+        getSongs()
+    ) { history, allSongs ->
+        val songMap = allSongs.associateBy { it.id }
+        val counts = history.groupingBy { it.songId }.eachCount()
+        
+        counts.entries
+            .sortedByDescending { it.value }
+            .take(50)
+            .mapNotNull { songMap[it.key] }
+    }.flowOn(Dispatchers.IO)
+
+    private fun getMediaStoreSongs(
+        selection: String?,
+        selectionArgs: Array<String>? = null,
+        customSortOrder: String? = null
+    ): Flow<List<Song>> = flow {
         val songs = mutableListOf<Song>()
         
         val collection = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
@@ -180,7 +207,7 @@ class MediaStoreMusicRepository @Inject constructor(
         } else {
             "${MediaStore.Audio.Media.IS_MUSIC} != 0"
         }
-        val sortOrder = "${MediaStore.Audio.Media.TITLE} ASC"
+        val sortOrder = customSortOrder ?: "${MediaStore.Audio.Media.TITLE} ASC"
         
         context.contentResolver.query(
             collection,
@@ -218,7 +245,7 @@ class MediaStoreMusicRepository @Inject constructor(
             }
         }
         emit(songs)
-    }.flowOn(Dispatchers.IO)
+    }
 
     override fun isFavorite(songId: Long): Flow<Boolean> = favoriteSongDao.isFavorite(songId)
 

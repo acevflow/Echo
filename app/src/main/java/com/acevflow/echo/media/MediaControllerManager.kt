@@ -36,6 +36,9 @@ class MediaControllerManager @Inject constructor(
     private val _currentMediaItem = MutableStateFlow<MediaItem?>(null)
     val currentMediaItem = _currentMediaItem.asStateFlow()
 
+    private val _playlist = MutableStateFlow<List<MediaItem>>(emptyList())
+    val playlist = _playlist.asStateFlow()
+
     private val _playbackPosition = MutableStateFlow(0L)
     val playbackPosition = _playbackPosition.asStateFlow()
 
@@ -64,6 +67,10 @@ class MediaControllerManager @Inject constructor(
         override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
             _currentMediaItem.value = mediaItem
             _duration.value = _controller.value?.duration?.coerceAtLeast(0L) ?: 0L
+        }
+
+        override fun onTimelineChanged(timeline: androidx.media3.common.Timeline, reason: Int) {
+            updatePlaylist()
         }
 
         override fun onPlaybackStateChanged(playbackState: Int) {
@@ -114,6 +121,7 @@ class MediaControllerManager @Inject constructor(
             _isPlaying.value = controller?.isPlaying ?: false
             _currentMediaItem.value = controller?.currentMediaItem
             _duration.value = controller?.duration?.coerceAtLeast(0L) ?: 0L
+            updatePlaylist()
             
             if (controller?.isPlaying == true) {
                 startProgressUpdate()
@@ -136,6 +144,16 @@ class MediaControllerManager @Inject constructor(
     private fun stopProgressUpdate() {
         progressJob?.cancel()
         progressJob = null
+    }
+
+    private fun updatePlaylist() {
+        _controller.value?.let { controller ->
+            val items = mutableListOf<MediaItem>()
+            for (i in 0 until controller.mediaItemCount) {
+                items.add(controller.getMediaItemAt(i))
+            }
+            _playlist.value = items
+        }
     }
 
     fun playSong(mediaItem: MediaItem) {
@@ -172,6 +190,21 @@ class MediaControllerManager @Inject constructor(
 
     fun skipToPrevious() {
         _controller.value?.seekToPrevious()
+    }
+
+    fun playNext(mediaItem: MediaItem) {
+        _controller.value?.run {
+            val nextIndex = if (mediaItemCount > 0) currentMediaItemIndex + 1 else 0
+            addMediaItem(nextIndex, mediaItem)
+        }
+    }
+
+    fun addToQueue(mediaItem: MediaItem) {
+        _controller.value?.addMediaItem(mediaItem)
+    }
+
+    fun removeFromQueue(index: Int) {
+        _controller.value?.removeMediaItem(index)
     }
 
     fun toggleShuffle() {

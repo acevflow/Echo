@@ -12,12 +12,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.QueueMusic
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.PauseCircleFilled
 import androidx.compose.material.icons.filled.PlayCircleFilled
 import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.filled.RepeatOne
+import androidx.compose.material.icons.filled.QueueMusic
 import androidx.compose.material.icons.filled.Shuffle
 import androidx.compose.material.icons.filled.SkipNext
 import androidx.compose.material.icons.filled.SkipPrevious
@@ -30,6 +32,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -42,8 +45,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.media3.common.Player
+import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.acevflow.echo.domain.util.TimeFormatter
+import com.acevflow.echo.ui.queue.QueueSheet
+import com.acevflow.echo.ui.queue.QueueViewModel
 
 @Composable
 fun PlayerScreen(
@@ -57,6 +63,8 @@ fun PlayerScreen(
     val isFavorite by viewModel.isFavorite.collectAsState()
     val shuffleModeEnabled by viewModel.shuffleModeEnabled.collectAsState()
     val repeatMode by viewModel.repeatMode.collectAsState()
+
+    var showQueueSheet by remember { mutableStateOf(false) }
 
     if (currentMediaItem == null) return
 
@@ -200,5 +208,22 @@ fun PlayerScreen(
                 )
             }
         }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        IconButton(onClick = { showQueueSheet = true }) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.QueueMusic,
+                contentDescription = "Show Queue",
+                modifier = Modifier.size(32.dp)
+            )
+        }
+    }
+
+    if (showQueueSheet) {
+        QueueSheet(
+            viewModel = hiltViewModel(),
+            onDismiss = { showQueueSheet = false }
+        )
     }
 }
