@@ -15,6 +15,7 @@ import com.acevflow.echo.ui.library.albums.AlbumsScreen
 import com.acevflow.echo.ui.library.artists.ArtistsScreen
 import com.acevflow.echo.ui.player.PlayerScreen
 import com.acevflow.echo.ui.player.PlayerViewModel
+import com.acevflow.echo.ui.search.SearchScreen
 
 @Composable
 fun NavGraph(
@@ -40,6 +41,17 @@ fun NavGraph(
         composable(Screen.Artists.route) {
             ArtistsScreen(
                 viewModel = hiltViewModel(),
+                onArtistClick = { artist ->
+                    navController.navigate(Screen.ArtistDetail.createRoute(artist.name))
+                }
+            )
+        }
+        composable(Screen.Search.route) {
+            SearchScreen(
+                viewModel = hiltViewModel(),
+                onAlbumClick = { album ->
+                    navController.navigate(Screen.AlbumDetail.createRoute(album.id))
+                },
                 onArtistClick = { artist ->
                     navController.navigate(Screen.ArtistDetail.createRoute(artist.name))
                 }

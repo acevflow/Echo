@@ -11,11 +11,15 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Album
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -33,6 +37,7 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -53,9 +58,22 @@ class MainActivity : ComponentActivity() {
 
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
+                    topBar = {
+                        val showTopBar = items.any { it.first.route == currentDestination?.route }
+                        if (showTopBar) {
+                            TopAppBar(
+                                title = { Text("Echo") },
+                                actions = {
+                                    IconButton(onClick = { navController.navigate(Screen.Search.route) }) {
+                                        Icon(Icons.Default.Search, contentDescription = "Search")
+                                    }
+                                }
+                            )
+                        }
+                    },
                     bottomBar = {
                         Column {
-                            if (currentMediaItem != null && currentDestination?.route != Screen.Player.route) {
+                            if (currentMediaItem != null && currentDestination?.route != Screen.Player.route && currentDestination?.route != Screen.Search.route) {
                                 MiniPlayer(
                                     viewModel = mainViewModel,
                                     onClick = {

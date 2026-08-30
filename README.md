@@ -10,6 +10,7 @@ Echo aims to provide a high-quality local music playback experience with a moder
 
 The following features are implemented:
 
+*   **Real-time Search**: Instant, library-wide search for songs, albums, and artists with immediate playback support.
 *   **Playback Intelligence**: Support for **Shuffle** and **Repeat** modes (Off, All, One) with real-time UI synchronization.
 *   **Settings Persistence**: Integrated Jetpack DataStore to persist user preferences like playback modes across app restarts.
 *   **Library Hierarchy**: Organized browsing by **Songs**, **Albums**, and **Artists** with a dedicated navigation bar.
@@ -75,6 +76,7 @@ The project follows a standard Android structure within the `:app` module:
     *   `ui/`: Composable screens, ViewModels, and navigation logic.
         *   `navigation/`: App routing and NavGraph.
         *   `library/`: Categorized views for Songs, Albums, and Artists.
+        *   `search/`: Real-time filtering and discovery UI.
         *   `player/`: Full-screen playback interface.
         *   `details/`: Detail screens for Albums and Artists.
         *   `components/`: Shared UI elements like the MiniPlayer.
@@ -108,7 +110,7 @@ The project follows a standard Android structure within the `:app` module:
 *   [x] Queue management & skip controls
 *   [x] Favorites support
 *   [x] Shuffle and repeat modes
-*   [ ] Search functionality
+*   [x] Search functionality
 *   [ ] Playlists
 *   [ ] Customizable themes
 
