@@ -12,6 +12,7 @@ import com.acevflow.echo.data.local.entity.PlaybackHistory
 import com.acevflow.echo.data.local.entity.PlaylistSongCrossRef
 import com.acevflow.echo.domain.model.Album
 import com.acevflow.echo.domain.model.Artist
+import com.acevflow.echo.domain.model.Folder
 import com.acevflow.echo.domain.model.Playlist
 import com.acevflow.echo.domain.model.Song
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -110,6 +111,32 @@ class MediaStoreMusicRepository @Inject constructor(
             }
         }
         emit(artists)
+    }.flowOn(Dispatchers.IO)
+
+    override fun getFolders(): Flow<List<Folder>> = flow {
+        val foldersMap = mutableMapOf<String, Int>()
+        val collection = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
+        val projection = arrayOf(MediaStore.Audio.Media.DATA)
+        val selection = "${MediaStore.Audio.Media.IS_MUSIC} != 0"
+
+        context.contentResolver.query(collection, projection, selection, null, null)?.use { cursor ->
+            val dataCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA)
+            while (cursor.moveToNext()) {
+                val path = cursor.getString(dataCol)
+                val parentPath = path.substringBeforeLast('/')
+                foldersMap[parentPath] = (foldersMap[parentPath] ?: 0) + 1
+            }
+        }
+
+        val folders = foldersMap.map { (path, count) ->
+            Folder(
+                name = path.substringAfterLast('/'),
+                path = path,
+                trackCount = count
+            )
+        }.sortedBy { it.name }
+
+        emit(folders)
     }.flowOn(Dispatchers.IO)
 
     override fun getSongsByAlbum(albumId: Long): Flow<List<Song>> = combine(
@@ -246,6 +273,17 @@ class MediaStoreMusicRepository @Inject constructor(
         }
         emit(songs)
     }
+
+    override fun getSongsByFolder(folderPath: String): Flow<List<Song>> = combine(
+        getMediaStoreSongs("${MediaStore.Audio.Media.DATA} LIKE ?", arrayOf("$folderPath/%")),
+        favoriteSongDao.getAllFavorites()
+    ) { mediaStoreSongs, favorites ->
+        val favoriteIds = favorites.map { it.songId }.toSet()
+        mediaStoreSongs.filter { it.contentUri.toString().substringBeforeLast('/') == folderPath } // More precise filter
+        mediaStoreSongs.map { song ->
+            song.copy(isFavorite = favoriteIds.contains(song.id))
+        }
+    }.flowOn(Dispatchers.IO)
 
     override fun isFavorite(songId: Long): Flow<Boolean> = favoriteSongDao.isFavorite(songId)
 

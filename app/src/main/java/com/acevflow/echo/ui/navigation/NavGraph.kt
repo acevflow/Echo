@@ -10,10 +10,12 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.acevflow.echo.ui.details.AlbumDetailScreen
 import com.acevflow.echo.ui.details.ArtistDetailScreen
+import com.acevflow.echo.ui.details.FolderDetailScreen
 import com.acevflow.echo.ui.details.PlaylistDetailScreen
 import com.acevflow.echo.ui.library.LibraryScreen
 import com.acevflow.echo.ui.library.albums.AlbumsScreen
 import com.acevflow.echo.ui.library.artists.ArtistsScreen
+import com.acevflow.echo.ui.library.folders.FoldersScreen
 import com.acevflow.echo.ui.library.recent.RecentScreen
 import com.acevflow.echo.ui.playlists.PlaylistsScreen
 import com.acevflow.echo.ui.settings.EqualizerScreen
@@ -48,6 +50,14 @@ fun NavGraph(
                 viewModel = hiltViewModel(),
                 onArtistClick = { artist ->
                     navController.navigate(Screen.ArtistDetail.createRoute(artist.name))
+                }
+            )
+        }
+        composable(Screen.Folders.route) {
+            FoldersScreen(
+                viewModel = hiltViewModel(),
+                onFolderClick = { folder ->
+                    navController.navigate(Screen.FolderDetail.createRoute(folder.path))
                 }
             )
         }
@@ -110,6 +120,12 @@ fun NavGraph(
             arguments = listOf(navArgument("playlistId") { type = NavType.LongType })
         ) {
             PlaylistDetailScreen(viewModel = hiltViewModel())
+        }
+        composable(
+            route = Screen.FolderDetail.route,
+            arguments = listOf(navArgument("folderPath") { type = NavType.StringType })
+        ) {
+            FolderDetailScreen(viewModel = hiltViewModel())
         }
     }
 }

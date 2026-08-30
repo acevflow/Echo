@@ -4,6 +4,7 @@ sealed class Screen(val route: String) {
     data object Songs : Screen("songs")
     data object Albums : Screen("albums")
     data object Artists : Screen("artists")
+    data object Folders : Screen("folders")
     data object Playlists : Screen("playlists")
     data object Recent : Screen("recent")
     data object Search : Screen("search")
@@ -18,5 +19,8 @@ sealed class Screen(val route: String) {
     }
     data object PlaylistDetail : Screen("playlist_detail/{playlistId}") {
         fun createRoute(playlistId: Long) = "playlist_detail/$playlistId"
+    }
+    data object FolderDetail : Screen("folder_detail/{folderPath}") {
+        fun createRoute(folderPath: String) = "folder_detail/${java.net.URLEncoder.encode(folderPath, "UTF-8")}"
     }
 }

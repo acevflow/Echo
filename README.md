@@ -10,6 +10,8 @@ Echo aims to provide a high-quality local music playback experience with a moder
 
 The following features are implemented:
 
+*   **Folder Browsing**: Navigate your physical music folders and directories directly from the app.
+*   **Home Screen Widget**: Control playback (Play/Pause, Next, Previous) directly from your home screen using Jetpack Glance.
 *   **Audio Customization**: Built-in **5-band Equalizer** with frequency adjustment and persistent audio profiles.
 *   **Sleep Timer**: Automated playback control with customizable countdown intervals (15-60 minutes).
 *   **Personalization**: Customizable app appearance with **Light**, **Dark**, and **System** theme modes, plus **Dynamic Color** support (Android 12+).
@@ -83,12 +85,14 @@ The project follows a standard Android structure within the `:app` module:
     *   `ui/`: Composable screens, ViewModels, and navigation logic.
         *   `navigation/`: App routing and NavGraph.
         *   `library/`: Categorized views for Songs, Albums, Artists, and Recently Played.
+        *   `folders/`: Physical directory browsing.
         *   `playlists/`: Custom collection management.
         *   `search/`: Real-time filtering and discovery UI.
-        *   *   `player/`: Full-screen playback interface.
+        *   `player/`: Full-screen playback interface.
         *   `queue/`: Interactive playback queue management (Bottom Sheet).
-        *   `details/`: Detail screens for Albums, Artists, and Playlists.
+        *   `details/`: Detail screens for Albums, Artists, Playlists, and Folders.
         *   `settings/`: App configuration, **Equalizer**, and personalization UI.
+        *   `widget/`: Home screen widget implementation using Jetpack Glance.
         *   `components/`: Shared UI elements like the MiniPlayer.
 *   `gradle/`: Version Catalog (`libs.versions.toml`) and wrapper configuration.
 
@@ -101,6 +105,7 @@ The project follows a standard Android structure within the `:app` module:
 *   [Room Database](https://developer.android.com/training/data-storage/room) - Local data persistence.
 *   [Jetpack DataStore](https://developer.android.com/topic/libraries/architecture/datastore) - Lightweight settings persistence.
 *   [Coil](https://coil-kt.github.io/coil/) - Asynchronous image loading.
+*   [Jetpack Glance](https://developer.android.com/jetpack/compose/glance) - Declarative home screen widgets.
 *   [Navigation Compose](https://developer.android.com/jetpack/compose/navigation) - Declarative navigation.
 *   [Dagger Hilt](https://dagger.dev/hilt/) - Dependency injection.
 *   [Reorderable Compose](https://github.com/Calvin-Sh/Reorderable) - Drag-and-drop list interactions.
@@ -129,6 +134,8 @@ The project follows a standard Android structure within the `:app` module:
 *   [x] Customizable themes (Light/Dark/Dynamic)
 *   [x] Audio customization (5-band Equalizer)
 *   [x] Sleep Timer
+*   [x] Folder browsing
+*   [x] Home Screen widgets (Jetpack Glance)
 *   [ ] Advanced audio transitions (Cross-fade)
 
 ## Contributing
