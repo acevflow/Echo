@@ -111,6 +111,7 @@ fun SearchContent(
             items(songs, key = { "song_${it.id}" }) { song ->
                 SongItem(
                     song = song,
+                    onAddToPlaylist = { /* Implementation for search could be added later */ },
                     modifier = Modifier
                         .clickable { onSongClick(song) }
                         .padding(horizontal = 16.dp, vertical = 8.dp)

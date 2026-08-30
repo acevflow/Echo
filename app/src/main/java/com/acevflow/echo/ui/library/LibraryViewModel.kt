@@ -23,6 +23,8 @@ class LibraryViewModel @Inject constructor(
     private val _uiState = MutableStateFlow<LibraryUiState>(LibraryUiState.Loading)
     val uiState: StateFlow<LibraryUiState> = _uiState.asStateFlow()
 
+    val playlists = musicRepository.getPlaylists()
+
     init {
         loadSongs()
     }
@@ -57,6 +59,12 @@ class LibraryViewModel @Inject constructor(
         }
         
         mediaControllerManager.setQueue(mediaItems, startIndex)
+    }
+
+    fun addSongToPlaylist(playlistId: Long, songId: Long) {
+        viewModelScope.launch {
+            musicRepository.addSongToPlaylist(playlistId, songId)
+        }
     }
 }
 

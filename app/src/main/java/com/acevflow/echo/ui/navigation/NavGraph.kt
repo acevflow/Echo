@@ -10,9 +10,11 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.acevflow.echo.ui.details.AlbumDetailScreen
 import com.acevflow.echo.ui.details.ArtistDetailScreen
+import com.acevflow.echo.ui.details.PlaylistDetailScreen
 import com.acevflow.echo.ui.library.LibraryScreen
 import com.acevflow.echo.ui.library.albums.AlbumsScreen
 import com.acevflow.echo.ui.library.artists.ArtistsScreen
+import com.acevflow.echo.ui.playlists.PlaylistsScreen
 import com.acevflow.echo.ui.player.PlayerScreen
 import com.acevflow.echo.ui.player.PlayerViewModel
 import com.acevflow.echo.ui.search.SearchScreen
@@ -46,6 +48,14 @@ fun NavGraph(
                 }
             )
         }
+        composable(Screen.Playlists.route) {
+            PlaylistsScreen(
+                viewModel = hiltViewModel(),
+                onPlaylistClick = { playlist ->
+                    navController.navigate(Screen.PlaylistDetail.createRoute(playlist.id))
+                }
+            )
+        }
         composable(Screen.Search.route) {
             SearchScreen(
                 viewModel = hiltViewModel(),
@@ -76,6 +86,12 @@ fun NavGraph(
                     navController.navigate(Screen.AlbumDetail.createRoute(album.id))
                 }
             )
+        }
+        composable(
+            route = Screen.PlaylistDetail.route,
+            arguments = listOf(navArgument("playlistId") { type = NavType.LongType })
+        ) {
+            PlaylistDetailScreen(viewModel = hiltViewModel())
         }
     }
 }

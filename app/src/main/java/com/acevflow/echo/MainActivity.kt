@@ -8,9 +8,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.PlaylistPlay
 import androidx.compose.material.icons.filled.Album
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.PlaylistPlay
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -53,7 +55,8 @@ class MainActivity : ComponentActivity() {
                 val items = listOf(
                     Triple(Screen.Songs, "Songs", Icons.Default.MusicNote),
                     Triple(Screen.Albums, "Albums", Icons.Default.Album),
-                    Triple(Screen.Artists, "Artists", Icons.Default.Person)
+                    Triple(Screen.Artists, "Artists", Icons.Default.Person),
+                    Triple(Screen.Playlists, "Playlists", Icons.AutoMirrored.Filled.PlaylistPlay)
                 )
 
                 Scaffold(

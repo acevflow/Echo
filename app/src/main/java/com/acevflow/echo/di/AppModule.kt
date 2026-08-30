@@ -8,6 +8,7 @@ import androidx.datastore.preferences.preferencesDataStoreFile
 import androidx.room.Room
 import com.acevflow.echo.data.local.EchoDatabase
 import com.acevflow.echo.data.local.dao.FavoriteSongDao
+import com.acevflow.echo.data.local.dao.PlaylistDao
 import com.acevflow.echo.data.repository.MediaStoreMusicRepository
 import com.acevflow.echo.data.repository.MusicRepository
 import dagger.Binds
@@ -36,13 +37,21 @@ abstract class AppModule {
                 context,
                 EchoDatabase::class.java,
                 EchoDatabase.DATABASE_NAME
-            ).build()
+            )
+            .fallbackToDestructiveMigration()
+            .build()
         }
 
         @Provides
         @Singleton
         fun provideFavoriteSongDao(database: EchoDatabase): FavoriteSongDao {
             return database.favoriteSongDao()
+        }
+
+        @Provides
+        @Singleton
+        fun providePlaylistDao(database: EchoDatabase): PlaylistDao {
+            return database.playlistDao()
         }
 
         @Provides

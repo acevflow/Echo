@@ -5,22 +5,30 @@ import android.content.Context
 import android.net.Uri
 import android.provider.MediaStore
 import com.acevflow.echo.data.local.dao.FavoriteSongDao
+import com.acevflow.echo.data.local.dao.PlaylistDao
 import com.acevflow.echo.data.local.entity.FavoriteSong
+import com.acevflow.echo.data.local.entity.PlaylistSongCrossRef
 import com.acevflow.echo.domain.model.Album
 import com.acevflow.echo.domain.model.Artist
+import com.acevflow.echo.domain.model.Playlist
 import com.acevflow.echo.domain.model.Song
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 class MediaStoreMusicRepository @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val favoriteSongDao: FavoriteSongDao
+    private val favoriteSongDao: FavoriteSongDao,
+    private val playlistDao: PlaylistDao
 ) : MusicRepository {
 
     override fun getSongs(): Flow<List<Song>> = combine(
@@ -218,5 +226,47 @@ class MediaStoreMusicRepository @Inject constructor(
         } else {
             favoriteSongDao.insertFavorite(FavoriteSong(songId))
         }
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override fun getPlaylists(): Flow<List<Playlist>> = playlistDao.getAllPlaylists().flatMapLatest { localPlaylists ->
+        if (localPlaylists.isEmpty()) {
+            flowOf(emptyList())
+        } else {
+            combine(
+                localPlaylists.map { lp ->
+                    playlistDao.getSongIdsForPlaylist(lp.id).map { ids ->
+                        Playlist(lp.id, lp.name, ids.size)
+                    }
+                }
+            ) { it.toList() }
+        }
+    }
+
+    override fun getSongsInPlaylist(playlistId: Long): Flow<List<Song>> = combine(
+        playlistDao.getSongIdsForPlaylist(playlistId),
+        getSongs()
+    ) { ids, allSongs ->
+        val idSet = ids.toSet()
+        allSongs.filter { idSet.contains(it.id) }
+    }
+
+    override suspend fun createPlaylist(name: String): Long {
+        return playlistDao.insertPlaylist(com.acevflow.echo.data.local.entity.Playlist(name = name))
+    }
+
+    override suspend fun deletePlaylist(playlistId: Long) {
+        val playlist = playlistDao.getPlaylistById(playlistId)
+        if (playlist != null) {
+            playlistDao.deletePlaylist(playlist)
+        }
+    }
+
+    override suspend fun addSongToPlaylist(playlistId: Long, songId: Long) {
+        playlistDao.addSongToPlaylist(PlaylistSongCrossRef(playlistId, songId))
+    }
+
+    override suspend fun removeSongFromPlaylist(playlistId: Long, songId: Long) {
+        playlistDao.removeSongFromPlaylist(playlistId, songId)
     }
 }
