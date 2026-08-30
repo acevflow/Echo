@@ -3,8 +3,10 @@ package com.acevflow.echo.data.local
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import com.acevflow.echo.data.local.dao.FavoriteSongDao
+import com.acevflow.echo.data.local.dao.PlaybackHistoryDao
 import com.acevflow.echo.data.local.dao.PlaylistDao
 import com.acevflow.echo.data.local.entity.FavoriteSong
+import com.acevflow.echo.data.local.entity.PlaybackHistory
 import com.acevflow.echo.data.local.entity.Playlist
 import com.acevflow.echo.data.local.entity.PlaylistSongCrossRef
 
@@ -12,14 +14,16 @@ import com.acevflow.echo.data.local.entity.PlaylistSongCrossRef
     entities = [
         FavoriteSong::class,
         Playlist::class,
-        PlaylistSongCrossRef::class
+        PlaylistSongCrossRef::class,
+        PlaybackHistory::class
     ],
-    version = 2,
+    version = 3,
     exportSchema = false
 )
 abstract class EchoDatabase : RoomDatabase() {
     abstract fun favoriteSongDao(): FavoriteSongDao
     abstract fun playlistDao(): PlaylistDao
+    abstract fun playbackHistoryDao(): PlaybackHistoryDao
 
     companion object {
         const val DATABASE_NAME = "echo_db"

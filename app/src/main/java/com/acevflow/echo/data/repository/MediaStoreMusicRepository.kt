@@ -5,8 +5,10 @@ import android.content.Context
 import android.net.Uri
 import android.provider.MediaStore
 import com.acevflow.echo.data.local.dao.FavoriteSongDao
+import com.acevflow.echo.data.local.dao.PlaybackHistoryDao
 import com.acevflow.echo.data.local.dao.PlaylistDao
 import com.acevflow.echo.data.local.entity.FavoriteSong
+import com.acevflow.echo.data.local.entity.PlaybackHistory
 import com.acevflow.echo.data.local.entity.PlaylistSongCrossRef
 import com.acevflow.echo.domain.model.Album
 import com.acevflow.echo.domain.model.Artist
@@ -28,7 +30,8 @@ import javax.inject.Inject
 class MediaStoreMusicRepository @Inject constructor(
     @ApplicationContext private val context: Context,
     private val favoriteSongDao: FavoriteSongDao,
-    private val playlistDao: PlaylistDao
+    private val playlistDao: PlaylistDao,
+    private val historyDao: PlaybackHistoryDao
 ) : MusicRepository {
 
     override fun getSongs(): Flow<List<Song>> = combine(
@@ -268,5 +271,24 @@ class MediaStoreMusicRepository @Inject constructor(
 
     override suspend fun removeSongFromPlaylist(playlistId: Long, songId: Long) {
         playlistDao.removeSongFromPlaylist(playlistId, songId)
+    }
+
+    override fun getRecentHistory(): Flow<List<Song>> = combine(
+        historyDao.getRecentHistory(),
+        getSongs()
+    ) { history, allSongs ->
+        val songMap = allSongs.associateBy { it.id }
+        // Filter out duplicates and preserve chronological order from history
+        history.mapNotNull { it.songId.let { id -> songMap[id] } }
+            .distinctBy { it.id }
+    }
+
+    override suspend fun addSongToHistory(songId: Long) {
+        historyDao.deleteHistoryBySongId(songId) // Remove old entries for this song to bump it to top
+        historyDao.insertHistoryEntry(PlaybackHistory(songId = songId))
+    }
+
+    override suspend fun clearHistory() {
+        historyDao.clearHistory()
     }
 }

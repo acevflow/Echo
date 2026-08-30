@@ -14,6 +14,7 @@ import com.acevflow.echo.ui.details.PlaylistDetailScreen
 import com.acevflow.echo.ui.library.LibraryScreen
 import com.acevflow.echo.ui.library.albums.AlbumsScreen
 import com.acevflow.echo.ui.library.artists.ArtistsScreen
+import com.acevflow.echo.ui.library.recent.RecentScreen
 import com.acevflow.echo.ui.playlists.PlaylistsScreen
 import com.acevflow.echo.ui.player.PlayerScreen
 import com.acevflow.echo.ui.player.PlayerViewModel
@@ -55,6 +56,9 @@ fun NavGraph(
                     navController.navigate(Screen.PlaylistDetail.createRoute(playlist.id))
                 }
             )
+        }
+        composable(Screen.Recent.route) {
+            RecentScreen(viewModel = hiltViewModel())
         }
         composable(Screen.Search.route) {
             SearchScreen(

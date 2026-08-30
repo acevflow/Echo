@@ -10,6 +10,7 @@ Echo aims to provide a high-quality local music playback experience with a moder
 
 The following features are implemented:
 
+*   **Listening History**: Automatically tracks recently played songs, allowing users to browse and clear their activity history.
 *   **Custom Playlists**: Create, manage, and play personalized song collections with full relational persistence.
 *   **Real-time Search**: Instant, library-wide search for songs, albums, and artists with immediate playback support.
 *   **Playback Intelligence**: Support for **Shuffle** and **Repeat** modes (Off, All, One) with real-time UI synchronization.
@@ -67,7 +68,7 @@ The project follows a standard Android structure within the `:app` module:
 
 *   `app/src/main/java/com/acevflow/echo/`:
     *   `data/`:
-        *   `local/`: Room database, DAOs, and entities.
+        *   `local/`: Room database, DAOs, and entities (Favorites, Playlists, History).
         *   `preferences/`: DataStore implementation for app settings.
         *   `repository/`: Repository implementations (MediaStore, Room, and DataStore).
     *   `domain/`: Core data models and repository interfaces.
@@ -76,7 +77,7 @@ The project follows a standard Android structure within the `:app` module:
     *   `media/`: Media3 service implementation and session management.
     *   `ui/`: Composable screens, ViewModels, and navigation logic.
         *   `navigation/`: App routing and NavGraph.
-        *   `library/`: Categorized views for Songs, Albums, and Artists.
+        *   `library/`: Categorized views for Songs, Albums, Artists, and Recently Played.
         *   `playlists/`: Custom collection management.
         *   `search/`: Real-time filtering and discovery UI.
         *   `player/`: Full-screen playback interface.
@@ -114,7 +115,8 @@ The project follows a standard Android structure within the `:app` module:
 *   [x] Shuffle and repeat modes
 *   [x] Search functionality
 *   [x] Custom playlists creation & management
-*   [ ] Recently played history
+*   [x] Recently played history
+*   [ ] Smart collections (Most Played)
 *   [ ] Customizable themes
 
 ## Contributing

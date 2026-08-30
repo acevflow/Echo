@@ -8,6 +8,7 @@ import androidx.datastore.preferences.preferencesDataStoreFile
 import androidx.room.Room
 import com.acevflow.echo.data.local.EchoDatabase
 import com.acevflow.echo.data.local.dao.FavoriteSongDao
+import com.acevflow.echo.data.local.dao.PlaybackHistoryDao
 import com.acevflow.echo.data.local.dao.PlaylistDao
 import com.acevflow.echo.data.repository.MediaStoreMusicRepository
 import com.acevflow.echo.data.repository.MusicRepository
@@ -52,6 +53,12 @@ abstract class AppModule {
         @Singleton
         fun providePlaylistDao(database: EchoDatabase): PlaylistDao {
             return database.playlistDao()
+        }
+
+        @Provides
+        @Singleton
+        fun providePlaybackHistoryDao(database: EchoDatabase): PlaybackHistoryDao {
+            return database.playbackHistoryDao()
         }
 
         @Provides

@@ -5,6 +5,7 @@ sealed class Screen(val route: String) {
     data object Albums : Screen("albums")
     data object Artists : Screen("artists")
     data object Playlists : Screen("playlists")
+    data object Recent : Screen("recent")
     data object Search : Screen("search")
     data object Player : Screen("player")
     data object AlbumDetail : Screen("album_detail/{albumId}") {
