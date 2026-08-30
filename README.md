@@ -29,7 +29,12 @@ Echo is built from the ground up using Jetpack Compose and modern Android archit
 
 ## Screenshots
 
-*Visual documentation will be added as the product design evolves.*
+<p align="center">
+  <img src="docs/screenshots/1.jpg" width="22%" />
+  <img src="docs/screenshots/2.jpg" width="22%" />
+  <img src="docs/screenshots/3.jpg" width="22%" />
+  <img src="docs/screenshots/4.jpg" width="22%" />
+</p>
 
 ## Requirements
 
@@ -38,20 +43,19 @@ Echo is built from the ground up using Jetpack Compose and modern Android archit
 
 ## Getting Started
 
-### Installation
+1.  **Clone the repository**: `git clone https://github.com/acevflow/Echo.git`
+2.  **Open in Android Studio**: Selection the root folder.
+3.  **Build & Run**: Use the `app` configuration.
 
-1.  Clone the repository:
-    ```bash
-    git clone https://github.com/acevflow/Echo.git
-    ```
-2.  Open the project in Android Studio (Ladybug or newer).
-3.  Sync Gradle and run the `:app` module on your device.
+For more detailed instructions, see the [Build & Installation guide](docs/build.md).
 
-## Development
+## Documentation
 
-Echo is developed with a strict adherence to **Clean Architecture** principles, ensuring the codebase remains modular, testable, and maintainable.
+- [**Architecture**](docs/architecture.md) - Learn about the Clean Architecture implementation.
+- [**Media Playback**](docs/media-playback.md) - Details on Media3, Equalizer, and Queue management.
+- [**Permissions**](docs/permissions.md) - Information on required Android permissions and data access.
 
-### Technical Stack
+## Technical Stack
 *   **UI**: Jetpack Compose (Material 3)
 *   **Logic**: Kotlin Coroutines & Flow
 *   **DI**: Dagger Hilt
