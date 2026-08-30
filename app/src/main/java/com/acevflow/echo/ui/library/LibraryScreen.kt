@@ -4,29 +4,20 @@ import android.Manifest
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -38,11 +29,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.acevflow.echo.domain.model.Playlist
 import com.acevflow.echo.domain.model.Song
-import com.acevflow.echo.ui.playlists.CreatePlaylistDialog
+import com.acevflow.echo.ui.components.EchoSongItem
+import com.acevflow.echo.ui.theme.Dims
 
 @Composable
 fun LibraryScreen(
@@ -72,16 +63,30 @@ fun LibraryScreen(
         permissionLauncher.launch(permission)
     }
     
-    Box(modifier = modifier.fillMaxSize()) {
+    Surface(
+        modifier = modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background
+    ) {
         when (val state = uiState) {
             LibraryUiState.Loading -> {
-                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                Box(modifier = Modifier.fillMaxSize()) {
+                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                }
             }
             LibraryUiState.Empty -> {
-                Text(
-                    text = "No songs found.",
-                    modifier = Modifier.align(Alignment.Center)
-                )
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = "No music found",
+                            style = MaterialTheme.typography.titleLarge
+                        )
+                        Text(
+                            text = "Add audio files to your device",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
             }
             is LibraryUiState.Success -> {
                 SongList(
@@ -120,86 +125,21 @@ fun SongList(
 ) {
     LazyColumn(
         modifier = modifier.fillMaxSize(),
-        contentPadding = PaddingValues(16.dp)
+        contentPadding = PaddingValues(bottom = Dims.MiniPlayerHeight + Dims.ScreenPadding)
     ) {
         itemsIndexed(songs, key = { _, song -> song.id }) { index, song ->
-            SongItem(
-                viewModel = viewModel,
+            EchoSongItem(
                 song = song,
-                onAddToPlaylist = { onAddToPlaylist(song) },
-                modifier = Modifier.clickable { onSongClick(index) }
+                onClick = { onSongClick(index) },
+                onPlayNext = { viewModel.playNext(song) },
+                onAddToQueue = { viewModel.addToQueue(song) },
+                onAddToPlaylist = { onAddToPlaylist(song) }
             )
-            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-        }
-    }
-}
-
-@Composable
-fun SongItem(
-    viewModel: LibraryViewModel,
-    song: Song,
-    onAddToPlaylist: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    var showMenu by remember { mutableStateOf(false) }
-
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = song.title,
-                style = MaterialTheme.typography.bodyLarge,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            Text(
-                text = song.artist,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-        }
-        
-        if (song.isFavorite) {
-            Icon(
-                imageVector = Icons.Default.Favorite,
-                contentDescription = "Favorite",
-                tint = androidx.compose.ui.graphics.Color.Red,
-                modifier = Modifier.size(20.dp)
-            )
-        }
-
-        Box {
-            IconButton(onClick = { showMenu = true }) {
-                Icon(Icons.Default.MoreVert, contentDescription = "More")
-            }
-            DropdownMenu(
-                expanded = showMenu,
-                onDismissRequest = { showMenu = false }
-            ) {
-                DropdownMenuItem(
-                    text = { Text("Add to Playlist") },
-                    onClick = {
-                        onAddToPlaylist()
-                        showMenu = false
-                    }
-                )
-                DropdownMenuItem(
-                    text = { Text("Play Next") },
-                    onClick = {
-                        viewModel.playNext(song)
-                        showMenu = false
-                    }
-                )
-                DropdownMenuItem(
-                    text = { Text("Add to Queue") },
-                    onClick = {
-                        viewModel.addToQueue(song)
-                        showMenu = false
-                    }
+            if (index < songs.size - 1) {
+                HorizontalDivider(
+                    modifier = Modifier.padding(horizontal = Dims.ElementPadding),
+                    thickness = 0.5.dp,
+                    color = MaterialTheme.colorScheme.surfaceVariant
                 )
             }
         }
@@ -220,14 +160,17 @@ fun AddToPlaylistDialog(
                 Text("No playlists found.")
             } else {
                 LazyColumn {
-                    items(playlists) { playlist ->
-                        Text(
-                            text = playlist.name,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable { onPlaylistSelected(playlist) }
-                                .padding(16.dp)
-                        )
+                    itemsIndexed(playlists) { _, playlist ->
+                        TextButton(
+                            onClick = { onPlaylistSelected(playlist) },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(
+                                text = playlist.name,
+                                modifier = Modifier.fillMaxWidth(),
+                                textAlign = androidx.compose.ui.text.style.TextAlign.Start
+                            )
+                        }
                     }
                 }
             }

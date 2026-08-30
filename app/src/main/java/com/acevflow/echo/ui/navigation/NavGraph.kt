@@ -95,7 +95,8 @@ fun NavGraph(
         composable(Screen.Player.route) {
             PlayerScreen(
                 viewModel = hiltViewModel(),
-                mainViewModel = hiltViewModel()
+                mainViewModel = hiltViewModel(),
+                onBack = { navController.popBackStack() }
             )
         }
         composable(

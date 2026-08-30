@@ -11,6 +11,7 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -19,7 +20,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.acevflow.echo.ui.theme.Dims
 
 @Composable
 fun SettingsScreen(
@@ -30,83 +33,92 @@ fun SettingsScreen(
     val themeMode by viewModel.themeMode.collectAsState(initial = 0)
     val dynamicColorEnabled by viewModel.dynamicColorEnabled.collectAsState(initial = true)
 
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(16.dp)
+    Surface(
+        modifier = modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background
     ) {
-        Text(
-            text = "Appearance",
-            style = MaterialTheme.typography.titleLarge,
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
-        
-        // ... (rest of Appearance section)
-
-        Text(
-            text = "Theme",
-            style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
-
-        Column(Modifier.selectableGroup()) {
-            ThemeOption("System default", themeMode == 0) { viewModel.setThemeMode(0) }
-            ThemeOption("Light", themeMode == 1) { viewModel.setThemeMode(1) }
-            ThemeOption("Dark", themeMode == 2) { viewModel.setThemeMode(2) }
-        }
-
-        Spacer(modifier = Modifier.padding(vertical = 8.dp))
-
-        Row(
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .fillMaxSize()
+                .padding(Dims.ScreenPadding)
         ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = "Dynamic Color",
-                    style = MaterialTheme.typography.titleMedium
-                )
-                Text(
-                    text = "Use colors from your wallpaper (Android 12+)",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+            Text(
+                text = "Appearance",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(bottom = Dims.ElementPadding)
+            )
+
+            Surface(
+                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                shape = MaterialTheme.shapes.medium
+            ) {
+                Column(Modifier.selectableGroup().padding(Dims.SmallPadding)) {
+                    ThemeOption("System default", themeMode == 0) { viewModel.setThemeMode(0) }
+                    ThemeOption("Light", themeMode == 1) { viewModel.setThemeMode(1) }
+                    ThemeOption("Dark", themeMode == 2) { viewModel.setThemeMode(2) }
+                }
+            }
+
+            Spacer(modifier = Modifier.padding(vertical = Dims.SmallPadding))
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = Dims.ElementPadding),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "Dynamic Color",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    Text(
+                        text = "Use colors from your wallpaper (Android 12+)",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                Switch(
+                    checked = dynamicColorEnabled,
+                    onCheckedChange = { viewModel.setDynamicColorEnabled(it) }
                 )
             }
-            Switch(
-                checked = dynamicColorEnabled,
-                onCheckedChange = { viewModel.setDynamicColorEnabled(it) }
+
+            Spacer(modifier = Modifier.padding(vertical = Dims.SmallPadding))
+
+            Text(
+                text = "Audio",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(bottom = Dims.ElementPadding)
             )
-        }
 
-        Spacer(modifier = Modifier.padding(vertical = 16.dp))
-
-        Text(
-            text = "Audio",
-            style = MaterialTheme.typography.titleLarge,
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable(onClick = onNavigateToEqualizer)
-                .padding(vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = "Equalizer",
-                    style = MaterialTheme.typography.titleMedium
-                )
-                Text(
-                    text = "Configure audio bands and presets",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable(onClick = onNavigateToEqualizer),
+                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                shape = MaterialTheme.shapes.medium
+            ) {
+                Row(
+                    modifier = Modifier.padding(Dims.ElementPadding),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = "Equalizer",
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        Text(
+                            text = "Configure audio bands and presets",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
             }
         }
     }
@@ -126,7 +138,7 @@ fun ThemeOption(
                 onClick = onClick,
                 role = Role.RadioButton
             )
-            .padding(vertical = 12.dp),
+            .padding(vertical = 12.dp, horizontal = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         RadioButton(
@@ -136,7 +148,7 @@ fun ThemeOption(
         Text(
             text = text,
             style = MaterialTheme.typography.bodyLarge,
-            modifier = Modifier.padding(start = 16.dp)
+            modifier = Modifier.padding(start = Dims.ElementPadding)
         )
     }
 }

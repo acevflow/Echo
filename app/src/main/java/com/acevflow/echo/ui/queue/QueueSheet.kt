@@ -29,6 +29,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
+import com.acevflow.echo.ui.theme.Dims
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -46,14 +47,15 @@ fun QueueSheet(
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        modifier = Modifier.fillMaxHeight(0.8f)
+        modifier = Modifier.fillMaxHeight(0.8f),
+        containerColor = MaterialTheme.colorScheme.surface
     ) {
-        Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
+        Column(modifier = Modifier.fillMaxWidth().padding(horizontal = Dims.ElementPadding)) {
             Text(
                 text = "Upcoming Queue",
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(bottom = 16.dp)
+                modifier = Modifier.padding(bottom = Dims.ElementPadding)
             )
 
             LazyColumn(
@@ -69,22 +71,27 @@ fun QueueSheet(
                                 .fillMaxWidth()
                                 .graphicsLayer {
                                     alpha = if (isDragging) 0.8f else 1f
-                                    scaleX = if (isDragging) 1.05f else 1f
-                                    scaleY = if (isDragging) 1.05f else 1f
+                                    scaleX = if (isDragging) 1.02f else 1f
+                                    scaleY = if (isDragging) 1.02f else 1f
                                 },
-                            tonalElevation = if (isDragging) 8.dp else 0.dp
+                            tonalElevation = if (isDragging) 8.dp else 0.dp,
+                            color = if (isDragging) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.surface
                         ) {
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(vertical = 8.dp),
+                                    .padding(vertical = Dims.TinyPadding),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 IconButton(
                                     modifier = Modifier.draggableHandle(),
                                     onClick = { }
                                 ) {
-                                    Icon(Icons.Default.DragHandle, contentDescription = "Reorder")
+                                    Icon(
+                                        imageVector = Icons.Default.DragHandle,
+                                        contentDescription = "Reorder",
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
                                 }
 
                                 Column(modifier = Modifier.weight(1f)) {
@@ -106,7 +113,11 @@ fun QueueSheet(
                                 }
                                 
                                 IconButton(onClick = { viewModel.removeFromQueue(index) }) {
-                                    Icon(Icons.Default.Close, contentDescription = "Remove")
+                                    Icon(
+                                        imageVector = Icons.Default.Close,
+                                        contentDescription = "Remove",
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
                                 }
                             }
                         }

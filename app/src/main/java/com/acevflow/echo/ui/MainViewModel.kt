@@ -22,6 +22,8 @@ class MainViewModel @Inject constructor(
     val themeMode = preferencesRepository.themeMode
     val dynamicColorEnabled = preferencesRepository.dynamicColorEnabled
     
+    val playbackPosition = mediaControllerManager.playbackPosition
+    val duration = mediaControllerManager.duration
     val sleepTimerMillisLeft = mediaControllerManager.sleepTimerMillisLeft
 
     init {

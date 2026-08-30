@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -17,7 +19,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.acevflow.echo.ui.theme.Dims
 
 @Composable
 fun EqualizerScreen(
@@ -27,64 +31,78 @@ fun EqualizerScreen(
     val enabled by viewModel.equalizerEnabled.collectAsState()
     val bands by viewModel.equalizerBands.collectAsState()
 
-    // 5 standard bands for a mobile equalizer
     val frequencyLabels = listOf("60 Hz", "230 Hz", "910 Hz", "3.6 kHz", "14 kHz")
 
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(16.dp)
+    Surface(
+        modifier = modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background
     ) {
-        Row(
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 24.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .fillMaxSize()
+                .padding(Dims.ScreenPadding)
         ) {
-            Text(
-                text = "Master Equalizer",
-                style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.weight(1f)
-            )
-            Switch(
-                checked = enabled,
-                onCheckedChange = { viewModel.toggleEqualizer() }
-            )
-        }
-
-        frequencyLabels.forEachIndexed { index, label ->
-            val gain = bands[index] ?: 0
-            
-            Column(
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 12.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                    .padding(bottom = 32.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = androidx.compose.foundation.layout.Arrangement.SpaceBetween
+                Text(
+                    text = "Master Equalizer",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.weight(1f)
+                )
+                Switch(
+                    checked = enabled,
+                    onCheckedChange = { viewModel.toggleEqualizer() }
+                )
+            }
+
+            frequencyLabels.forEachIndexed { index, label ->
+                val gain = bands[index] ?: 0
+                
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 12.dp)
                 ) {
-                    Text(text = label, style = MaterialTheme.typography.bodyMedium)
-                    Text(
-                        text = if (gain > 0) "+$gain dB" else "$gain dB",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.primary
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = androidx.compose.foundation.layout.Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = label,
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        Text(
+                            text = if (gain > 0) "+$gain dB" else "$gain dB",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                    
+                    var sliderValue by remember(gain) { mutableFloatStateOf(gain.toFloat()) }
+                    
+                    Slider(
+                        value = sliderValue,
+                        onValueChange = { sliderValue = it },
+                        onValueChangeFinished = {
+                            viewModel.setBandLevel(index, sliderValue.toInt())
+                        },
+                        valueRange = -15f..15f,
+                        enabled = enabled,
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = SliderDefaults.colors(
+                            thumbColor = MaterialTheme.colorScheme.primary,
+                            activeTrackColor = MaterialTheme.colorScheme.primary,
+                            inactiveTrackColor = MaterialTheme.colorScheme.surfaceVariant
+                        )
                     )
                 }
-                
-                var sliderValue by remember(gain) { mutableFloatStateOf(gain.toFloat()) }
-                
-                Slider(
-                    value = sliderValue,
-                    onValueChange = { sliderValue = it },
-                    onValueChangeFinished = {
-                        viewModel.setBandLevel(index, sliderValue.toInt())
-                    },
-                    valueRange = -15f..15f,
-                    enabled = enabled,
-                    modifier = Modifier.fillMaxWidth()
-                )
             }
         }
     }
