@@ -16,6 +16,7 @@ import com.acevflow.echo.ui.library.albums.AlbumsScreen
 import com.acevflow.echo.ui.library.artists.ArtistsScreen
 import com.acevflow.echo.ui.library.recent.RecentScreen
 import com.acevflow.echo.ui.playlists.PlaylistsScreen
+import com.acevflow.echo.ui.settings.SettingsScreen
 import com.acevflow.echo.ui.player.PlayerScreen
 import com.acevflow.echo.ui.player.PlayerViewModel
 import com.acevflow.echo.ui.search.SearchScreen
@@ -70,6 +71,9 @@ fun NavGraph(
                     navController.navigate(Screen.ArtistDetail.createRoute(artist.name))
                 }
             )
+        }
+        composable(Screen.Settings.route) {
+            SettingsScreen(viewModel = hiltViewModel())
         }
         composable(Screen.Player.route) {
             PlayerScreen(viewModel = hiltViewModel())

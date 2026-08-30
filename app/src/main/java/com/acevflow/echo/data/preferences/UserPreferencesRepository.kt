@@ -17,6 +17,8 @@ class UserPreferencesRepository @Inject constructor(
     private object PreferencesKeys {
         val SHUFFLE_MODE_ENABLED = booleanPreferencesKey("shuffle_mode_enabled")
         val REPEAT_MODE = intPreferencesKey("repeat_mode")
+        val THEME_MODE = intPreferencesKey("theme_mode")
+        val DYNAMIC_COLOR_ENABLED = booleanPreferencesKey("dynamic_color_enabled")
     }
 
     val shuffleModeEnabled: Flow<Boolean> = dataStore.data.map { preferences ->
@@ -25,6 +27,14 @@ class UserPreferencesRepository @Inject constructor(
 
     val repeatMode: Flow<Int> = dataStore.data.map { preferences ->
         preferences[PreferencesKeys.REPEAT_MODE] ?: 0 // 0 = REPEAT_MODE_OFF
+    }
+
+    val themeMode: Flow<Int> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.THEME_MODE] ?: 0 // 0 = System, 1 = Light, 2 = Dark
+    }
+
+    val dynamicColorEnabled: Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.DYNAMIC_COLOR_ENABLED] ?: true
     }
 
     suspend fun setShuffleModeEnabled(enabled: Boolean) {
@@ -36,6 +46,18 @@ class UserPreferencesRepository @Inject constructor(
     suspend fun setRepeatMode(repeatMode: Int) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.REPEAT_MODE] = repeatMode
+        }
+    }
+
+    suspend fun setThemeMode(themeMode: Int) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.THEME_MODE] = themeMode
+        }
+    }
+
+    suspend fun setDynamicColorEnabled(enabled: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.DYNAMIC_COLOR_ENABLED] = enabled
         }
     }
 }

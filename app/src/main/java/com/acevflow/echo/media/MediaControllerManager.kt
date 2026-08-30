@@ -207,6 +207,10 @@ class MediaControllerManager @Inject constructor(
         _controller.value?.removeMediaItem(index)
     }
 
+    fun moveMediaItem(fromIndex: Int, toIndex: Int) {
+        _controller.value?.moveMediaItem(fromIndex, toIndex)
+    }
+
     fun toggleShuffle() {
         _controller.value?.let {
             it.shuffleModeEnabled = !it.shuffleModeEnabled

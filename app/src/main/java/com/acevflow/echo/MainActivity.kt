@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.PlaylistPlay
@@ -14,6 +15,7 @@ import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Restore
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -44,12 +46,24 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            EchoTheme {
+            val mainViewModel: MainViewModel = hiltViewModel()
+            val themeMode by mainViewModel.themeMode.collectAsState(initial = 0)
+            val dynamicColorEnabled by mainViewModel.dynamicColorEnabled.collectAsState(initial = true)
+            
+            val darkTheme = when (themeMode) {
+                1 -> false
+                2 -> true
+                else -> isSystemInDarkTheme()
+            }
+
+            EchoTheme(
+                darkTheme = darkTheme,
+                dynamicColor = dynamicColorEnabled
+            ) {
                 val navController = rememberNavController()
                 val navBackStackEntry by navController.currentBackStackEntryAsState()
                 val currentDestination = navBackStackEntry?.destination
                 
-                val mainViewModel: MainViewModel = hiltViewModel()
                 val currentMediaItem by mainViewModel.currentMediaItem.collectAsState()
 
                 val items = listOf(
@@ -70,6 +84,9 @@ class MainActivity : ComponentActivity() {
                                 actions = {
                                     IconButton(onClick = { navController.navigate(Screen.Search.route) }) {
                                         Icon(Icons.Default.Search, contentDescription = "Search")
+                                    }
+                                    IconButton(onClick = { navController.navigate(Screen.Settings.route) }) {
+                                        Icon(Icons.Default.Settings, contentDescription = "Settings")
                                     }
                                 }
                             )

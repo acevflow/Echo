@@ -16,4 +16,8 @@ class QueueViewModel @Inject constructor(
     fun removeFromQueue(index: Int) {
         mediaControllerManager.removeFromQueue(index)
     }
+
+    fun moveItem(fromIndex: Int, toIndex: Int) {
+        mediaControllerManager.moveMediaItem(fromIndex, toIndex)
+    }
 }

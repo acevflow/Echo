@@ -10,7 +10,8 @@ Echo aims to provide a high-quality local music playback experience with a moder
 
 The following features are implemented:
 
-*   **Interactive Queue**: View and manage upcoming tracks via a dedicated **Queue Bottom Sheet**; support for "Play Next" and "Add to Queue" actions.
+*   **Personalization**: Customizable app appearance with **Light**, **Dark**, and **System** theme modes, plus **Dynamic Color** support (Android 12+).
+*   **Interactive Queue**: View and manage upcoming tracks via a dedicated **Queue Bottom Sheet**; support for "Play Next", "Add to Queue", and **Drag-and-Drop Reordering**.
 *   **Smart Collections**: Automated "Most Played" and "Recently Added" lists generated from your listening habits and device storage.
 *   **Listening History**: Automatically tracks recently played songs, allowing users to browse and clear their activity history.
 *   **Custom Playlists**: Create, manage, and play personalized song collections with full relational persistence.
@@ -82,9 +83,10 @@ The project follows a standard Android structure within the `:app` module:
         *   `library/`: Categorized views for Songs, Albums, Artists, and Recently Played.
         *   `playlists/`: Custom collection management.
         *   `search/`: Real-time filtering and discovery UI.
-        *   `player/`: Full-screen playback interface.
+        *   *   `player/`: Full-screen playback interface.
         *   `queue/`: Interactive playback queue management (Bottom Sheet).
         *   `details/`: Detail screens for Albums, Artists, and Playlists.
+        *   `settings/`: App configuration and personalization UI.
         *   `components/`: Shared UI elements like the MiniPlayer.
 *   `gradle/`: Version Catalog (`libs.versions.toml`) and wrapper configuration.
 
@@ -99,6 +101,7 @@ The project follows a standard Android structure within the `:app` module:
 *   [Coil](https://coil-kt.github.io/coil/) - Asynchronous image loading.
 *   [Navigation Compose](https://developer.android.com/jetpack/compose/navigation) - Declarative navigation.
 *   [Dagger Hilt](https://dagger.dev/hilt/) - Dependency injection.
+*   [Reorderable Compose](https://github.com/Calvin-Sh/Reorderable) - Drag-and-drop list interactions.
 *   [KSP](https://github.com/google/ksp) - Kotlin Symbol Processing.
 *   [Gradle](https://gradle.org/) - Build system.
 
@@ -120,8 +123,9 @@ The project follows a standard Android structure within the `:app` module:
 *   [x] Custom playlists creation & management
 *   [x] Recently played history
 *   [x] Smart collections (Most Played, Recently Added)
-*   [x] Advanced queue management (Play Next, Add to Queue)
-*   [ ] Customizable themes
+*   [x] Advanced queue management (Play Next, Add to Queue, Reordering)
+*   [x] Customizable themes (Light/Dark/Dynamic)
+*   [ ] Audio quality settings
 
 ## Contributing
 
