@@ -6,7 +6,7 @@ Echo follows **Clean Architecture** principles to ensure a modular, testable, an
 
 ### 1. Data Layer (`data/`)
 The data layer is responsible for retrieving and persisting data from various sources.
-- **`local/`**: Contains the Room database implementation, including DAOs and entities for Favorites, Playlists, and Playback History.
+- **`local/`**: Contains the Room database implementation, including DAOs and entities for Favorites, Playlists, Playback History, and **Search History**.
 - **`preferences/`**: Implements Jetpack DataStore for reactive storage of user settings (e.g., Theme, Shuffle/Repeat modes, Equalizer bands).
 - **`repository/`**: Contains the implementations of the domain repositories.
     - `MediaStoreMusicRepository`: Discovers local music files using the Android MediaStore API and synchronizes them with the local database.
@@ -25,6 +25,7 @@ The media layer handles everything related to audio playback and synchronization
 The UI layer is built entirely with **Jetpack Compose** and follows the MVVM pattern.
 - **`navigation/`**: Manages app routing using Navigation Compose.
 - **`theme/`**: Defines the Material 3 design system, including colors, typography, and spacing.
+- **Adaptive UI**: Dynamically branches between **Navigation Rail** (Tablets/Large screens) and **Bottom Bar** (Phones) layouts based on `WindowSizeClass`.
 - **`components/`**: Reusable UI elements like the MiniPlayer and custom list items.
 - **Screens**: Each feature (Library, Player, Search, Settings) has its own package containing the Composable screen and its associated ViewModel.
 

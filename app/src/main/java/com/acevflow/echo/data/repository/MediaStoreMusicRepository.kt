@@ -7,9 +7,11 @@ import androidx.core.net.toUri
 import com.acevflow.echo.data.local.dao.FavoriteSongDao
 import com.acevflow.echo.data.local.dao.PlaybackHistoryDao
 import com.acevflow.echo.data.local.dao.PlaylistDao
+import com.acevflow.echo.data.local.dao.SearchHistoryDao
 import com.acevflow.echo.data.local.entity.FavoriteSong
 import com.acevflow.echo.data.local.entity.PlaybackHistory
 import com.acevflow.echo.data.local.entity.PlaylistSongCrossRef
+import com.acevflow.echo.data.local.entity.SearchHistory
 import com.acevflow.echo.domain.model.Album
 import com.acevflow.echo.domain.model.Artist
 import com.acevflow.echo.domain.model.Folder
@@ -36,7 +38,8 @@ class MediaStoreMusicRepository @Inject constructor(
     @ApplicationContext private val context: Context,
     private val favoriteSongDao: FavoriteSongDao,
     private val playlistDao: PlaylistDao,
-    private val historyDao: PlaybackHistoryDao
+    private val historyDao: PlaybackHistoryDao,
+    private val searchHistoryDao: SearchHistoryDao
 ) : MusicRepository {
 
     override fun getSongs(): Flow<List<Song>> = combine(
@@ -362,5 +365,23 @@ class MediaStoreMusicRepository @Inject constructor(
 
     override suspend fun clearHistory() {
         historyDao.clearHistory()
+    }
+
+    override fun getRecentSearchHistory(): Flow<List<String>> = 
+        searchHistoryDao.getRecentSearchHistory().map { history ->
+            history.map { it.query }
+        }
+
+    override suspend fun addSearchQuery(query: String) {
+        if (query.isBlank()) return
+        searchHistoryDao.insertSearchQuery(SearchHistory(query))
+    }
+
+    override suspend fun deleteSearchQuery(query: String) {
+        searchHistoryDao.deleteSearchQuery(query)
+    }
+
+    override suspend fun clearSearchHistory() {
+        searchHistoryDao.clearSearchHistory()
     }
 }

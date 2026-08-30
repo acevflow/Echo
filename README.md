@@ -17,10 +17,12 @@ Echo is built from the ground up using Jetpack Compose and modern Android archit
 *   **Hierarchical Browsing**: Organize your collection by **Songs**, **Albums**, **Artists**, or **Folders**.
 *   **Smart Discovery**: Dynamic "Most Played" and "Recently Added" collections that adapt to your habits.
 *   **Instant Search**: Real-time filtering across your entire library with immediate playback support.
+*   **Search Intelligence**: Persistent **Search History** with interactive suggestions and one-tap filtering.
 *   **User Collections**: Create and manage custom **Playlists** and keep track of your **Favorites**.
 *   **Listening History**: Automatic tracking of your recently played tracks with manual management.
 
 ### Advanced Customization
+*   **Adaptive UI**: Responsive layouts optimized for **Phones**, **Tablets**, and **Foldables** using Window Size Classes.
 *   **Interactive Queue**: Manage upcoming tracks via a dedicated Bottom Sheet with **drag-and-drop reordering**.
 *   **Professional Audio**: Built-in **5-band Equalizer** with frequency adjustment and persistent audio profiles.
 *   **Automation**: Integrated **Sleep Timer** with customizable intervals to automatically stop playback.
@@ -56,7 +58,7 @@ For more detailed instructions, see the [Build & Installation guide](docs/build.
 - [**Permissions**](docs/permissions.md) - Information on required Android permissions and data access.
 
 ## Technical Stack
-*   **UI**: Jetpack Compose (Material 3)
+*   **UI**: Jetpack Compose (Material 3 & Window Size Classes)
 *   **Logic**: Kotlin Coroutines & Flow
 *   **DI**: Dagger Hilt
 *   **Database**: Room (Relational persistence)
@@ -69,11 +71,9 @@ For more detailed instructions, see the [Build & Installation guide](docs/build.
 
 ### Next Release
 - [ ] **Advanced Audio Transitions**: Implementation of true gapless playback and cross-fade support.
-- [ ] **Adaptive UI**: Optimized layouts for large screens, tablets, and foldables using Window Size Classes.
-- [ ] **Search Refinement**: Persistent search history and improved filtering algorithms.
+- [ ] **Metadata Editor**: In-app support for editing audio file tags and album art.
 
 ### Future
-- [ ] **Metadata Editor**: In-app support for editing audio file tags and album art.
 - [ ] **Enhanced Widgets**: Multiple widget sizes and customizable shortcut actions.
 - [ ] **Wear OS Support**: Companion app for music control from your wrist.
 

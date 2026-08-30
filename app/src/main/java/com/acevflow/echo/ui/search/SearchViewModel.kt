@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
@@ -26,6 +27,9 @@ class SearchViewModel @Inject constructor(
 
     private val _query = MutableStateFlow("")
     val query: StateFlow<String> = _query.asStateFlow()
+
+    val searchHistory = musicRepository.getRecentSearchHistory()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     val searchResults: StateFlow<SearchResults> = combine(
         _query,
@@ -49,6 +53,12 @@ class SearchViewModel @Inject constructor(
             if (filteredSongs.isEmpty() && filteredAlbums.isEmpty() && filteredArtists.isEmpty()) {
                 SearchResults.NoResults
             } else {
+                // If we have successful results, consider adding to history
+                if (filteredSongs.isNotEmpty() || filteredAlbums.isNotEmpty() || filteredArtists.isNotEmpty()) {
+                    viewModelScope.launch {
+                        musicRepository.addSearchQuery(query)
+                    }
+                }
                 SearchResults.Success(filteredSongs, filteredAlbums, filteredArtists)
             }
         }
@@ -56,6 +66,18 @@ class SearchViewModel @Inject constructor(
 
     fun onQueryChange(newQuery: String) {
         _query.value = newQuery
+    }
+
+    fun deleteHistoryItem(query: String) {
+        viewModelScope.launch {
+            musicRepository.deleteSearchQuery(query)
+        }
+    }
+
+    fun clearHistory() {
+        viewModelScope.launch {
+            musicRepository.clearSearchHistory()
+        }
     }
 
     fun playSong(song: Song) {

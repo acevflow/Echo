@@ -11,8 +11,14 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.PlaylistPlay
 import androidx.compose.material.icons.filled.Album
@@ -28,12 +34,18 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationRail
+import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
+import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -47,15 +59,19 @@ import com.acevflow.echo.ui.components.MiniPlayer
 import com.acevflow.echo.ui.navigation.NavGraph
 import com.acevflow.echo.ui.navigation.Screen
 import com.acevflow.echo.ui.theme.EchoTheme
+import com.acevflow.echo.ui.theme.Dims
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    @OptIn(ExperimentalMaterial3Api::class)
+    @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
+            val windowSizeClass = calculateWindowSizeClass(this)
+            val useNavigationRail = windowSizeClass.widthSizeClass != WindowWidthSizeClass.Compact
+
             val mainViewModel: MainViewModel = hiltViewModel()
             val themeMode by mainViewModel.themeMode.collectAsState(initial = 0)
             val dynamicColorEnabled by mainViewModel.dynamicColorEnabled.collectAsState(initial = true)
@@ -115,30 +131,72 @@ class MainActivity : ComponentActivity() {
                         }
                     },
                     bottomBar = {
-                        Column {
-                            AnimatedVisibility(
-                                visible = currentMediaItem != null && 
-                                        currentDestination?.route != Screen.Player.route && 
-                                        currentDestination?.route != Screen.Search.route,
-                                enter = fadeIn() + expandVertically(),
-                                exit = fadeOut() + shrinkVertically()
-                            ) {
-                                MiniPlayer(
-                                    viewModel = mainViewModel,
-                                    onClick = {
-                                        navController.navigate(Screen.Player.route)
+                        if (!useNavigationRail) {
+                            Column {
+                                AnimatedVisibility(
+                                    visible = currentMediaItem != null && 
+                                            currentDestination?.route != Screen.Player.route && 
+                                            currentDestination?.route != Screen.Search.route,
+                                    enter = fadeIn() + expandVertically(),
+                                    exit = fadeOut() + shrinkVertically()
+                                ) {
+                                    MiniPlayer(
+                                        viewModel = mainViewModel,
+                                        onClick = {
+                                            navController.navigate(Screen.Player.route)
+                                        }
+                                    )
+                                }
+                                
+                                val showNavBar = items.any { it.first.route == currentDestination?.route }
+                                if (showNavBar) {
+                                    NavigationBar(
+                                        containerColor = MaterialTheme.colorScheme.background,
+                                        tonalElevation = 0.dp
+                                    ) {
+                                        items.forEach { (screen, label, icon) ->
+                                            NavigationBarItem(
+                                                icon = { Icon(icon, contentDescription = null) },
+                                                label = { Text(label) },
+                                                selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true,
+                                                onClick = {
+                                                    navController.navigate(screen.route) {
+                                                        popUpTo(navController.graph.findStartDestination().id) {
+                                                            saveState = true
+                                                        }
+                                                        launchSingleTop = true
+                                                        restoreState = true
+                                                    }
+                                                }
+                                            )
+                                        }
                                     }
-                                )
+                                }
                             }
-                            
-                            val showNavBar = items.any { it.first.route == currentDestination?.route }
-                            if (showNavBar) {
-                                NavigationBar(
+                        }
+                    }
+                ) { innerPadding ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(innerPadding)
+                    ) {
+                        if (useNavigationRail) {
+                            val showRail = items.any { it.first.route == currentDestination?.route }
+                            if (showRail) {
+                                NavigationRail(
                                     containerColor = MaterialTheme.colorScheme.background,
-                                    tonalElevation = 0.dp
+                                    header = {
+                                        Icon(
+                                            imageVector = Icons.Default.MusicNote,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.primary,
+                                            modifier = Modifier.padding(vertical = 16.dp)
+                                        )
+                                    }
                                 ) {
                                     items.forEach { (screen, label, icon) ->
-                                        NavigationBarItem(
+                                        NavigationRailItem(
                                             icon = { Icon(icon, contentDescription = null) },
                                             label = { Text(label) },
                                             selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true,
@@ -156,12 +214,38 @@ class MainActivity : ComponentActivity() {
                                 }
                             }
                         }
+
+                        Box(modifier = Modifier.weight(1f)) {
+                            NavGraph(
+                                navController = navController,
+                                modifier = Modifier.fillMaxSize()
+                            )
+                            
+                            if (useNavigationRail) {
+                                Box(
+                                    modifier = Modifier
+                                        .align(Alignment.BottomEnd)
+                                        .padding(Dims.ScreenPadding)
+                                ) {
+                                    androidx.compose.animation.AnimatedVisibility(
+                                        visible = currentMediaItem != null && 
+                                                currentDestination?.route != Screen.Player.route && 
+                                                currentDestination?.route != Screen.Search.route,
+                                        enter = fadeIn(),
+                                        exit = fadeOut()
+                                    ) {
+                                        MiniPlayer(
+                                            viewModel = mainViewModel,
+                                            onClick = {
+                                                navController.navigate(Screen.Player.route)
+                                            },
+                                            modifier = Modifier.width(360.dp)
+                                        )
+                                    }
+                                }
+                            }
+                        }
                     }
-                ) { innerPadding ->
-                    NavGraph(
-                        navController = navController,
-                        modifier = Modifier.padding(innerPadding)
-                    )
                 }
             }
         }

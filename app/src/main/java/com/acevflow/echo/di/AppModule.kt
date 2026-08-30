@@ -10,6 +10,7 @@ import com.acevflow.echo.data.local.EchoDatabase
 import com.acevflow.echo.data.local.dao.FavoriteSongDao
 import com.acevflow.echo.data.local.dao.PlaybackHistoryDao
 import com.acevflow.echo.data.local.dao.PlaylistDao
+import com.acevflow.echo.data.local.dao.SearchHistoryDao
 import com.acevflow.echo.data.repository.MediaStoreMusicRepository
 import com.acevflow.echo.data.repository.MusicRepository
 import dagger.Binds
@@ -59,6 +60,12 @@ abstract class AppModule {
         @Singleton
         fun providePlaybackHistoryDao(database: EchoDatabase): PlaybackHistoryDao {
             return database.playbackHistoryDao()
+        }
+
+        @Provides
+        @Singleton
+        fun provideSearchHistoryDao(database: EchoDatabase): SearchHistoryDao {
+            return database.searchHistoryDao()
         }
 
         @Provides

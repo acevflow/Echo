@@ -11,6 +11,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -45,6 +50,7 @@ fun SearchScreen(
 ) {
     val query by viewModel.query.collectAsState()
     val searchResults by viewModel.searchResults.collectAsState()
+    val searchHistory by viewModel.searchHistory.collectAsState()
 
     Surface(
         modifier = modifier.fillMaxSize(),
@@ -70,12 +76,21 @@ fun SearchScreen(
             Box(modifier = Modifier.fillMaxSize()) {
                 when (val results = searchResults) {
                     SearchResults.Empty -> {
-                        Text(
-                            text = "Discover your music",
-                            modifier = Modifier.align(Alignment.Center),
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                        if (searchHistory.isNotEmpty()) {
+                            SearchHistoryContent(
+                                history = searchHistory,
+                                onHistoryClick = { viewModel.onQueryChange(it) },
+                                onDeleteHistoryItem = { viewModel.deleteHistoryItem(it) },
+                                onClearHistory = { viewModel.clearHistory() }
+                            )
+                        } else {
+                            Text(
+                                text = "Discover your music",
+                                modifier = Modifier.align(Alignment.Center),
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
                     SearchResults.NoResults -> {
                         Text(
@@ -94,6 +109,70 @@ fun SearchScreen(
                             onSongClick = { viewModel.playSong(it) },
                             onAlbumClick = onAlbumClick,
                             onArtistClick = onArtistClick
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun SearchHistoryContent(
+    history: List<String>,
+    onHistoryClick: (String) -> Unit,
+    onDeleteHistoryItem: (String) -> Unit,
+    onClearHistory: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(modifier = modifier.fillMaxSize()) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(Dims.ScreenPadding),
+            horizontalArrangement = androidx.compose.foundation.layout.Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Recent Searches",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
+            androidx.compose.material3.TextButton(onClick = onClearHistory) {
+                Text("Clear All")
+            }
+        }
+
+        LazyColumn(modifier = Modifier.fillMaxSize()) {
+            items(history, key = { it }) { query ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onHistoryClick(query) }
+                        .padding(horizontal = Dims.ScreenPadding, vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.History,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Text(
+                        text = query,
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(start = Dims.ElementPadding),
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                    androidx.compose.material3.IconButton(
+                        onClick = { onDeleteHistoryItem(query) },
+                        modifier = Modifier.size(24.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Remove",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }

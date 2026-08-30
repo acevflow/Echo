@@ -75,4 +75,17 @@ interface MusicRepository {
 
     /** Returns a flow of the most frequently played songs. */
     fun getMostPlayed(): Flow<List<Song>>
+
+    // Search History
+    /** Returns a flow of recent search queries. */
+    fun getRecentSearchHistory(): Flow<List<String>>
+
+    /** Saves a search query to history. */
+    suspend fun addSearchQuery(query: String)
+
+    /** Deletes a specific search query from history. */
+    suspend fun deleteSearchQuery(query: String)
+
+    /** Clears all search history. */
+    suspend fun clearSearchHistory()
 }
