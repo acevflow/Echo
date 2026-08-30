@@ -10,6 +10,8 @@ Echo aims to provide a high-quality local music playback experience with a moder
 
 The following features are implemented:
 
+*   **Library Hierarchy**: Organized browsing by **Songs**, **Albums**, and **Artists** with a dedicated navigation bar.
+*   **Detail Views**: Explore tracks within a specific album or view all albums from an artist.
 *   **Local Persistence**: Integrated Room database to persist user data and preferences.
 *   **Favorites Support**: Allows users to mark songs as favorites, with status synced across the entire UI.
 *   **Local Music Discovery**: Automatically scans audio files on the device using the MediaStore API.
@@ -69,8 +71,9 @@ The project follows a standard Android structure within the `:app` module:
     *   `media/`: Media3 service implementation and session management.
     *   `ui/`: Composable screens, ViewModels, and navigation logic.
         *   `navigation/`: App routing and NavGraph.
-        *   `library/`: Song listing and discovery UI.
+        *   `library/`: Categorized views for Songs, Albums, and Artists.
         *   `player/`: Full-screen playback interface.
+        *   `details/`: Detail screens for Albums and Artists.
         *   `components/`: Shared UI elements like the MiniPlayer.
 *   `gradle/`: Version Catalog (`libs.versions.toml`) and wrapper configuration.
 
@@ -90,7 +93,7 @@ The project follows a standard Android structure within the `:app` module:
 ## Roadmap
 
 *   [x] Local music discovery
-*   [ ] Music library browsing (Albums/Artists)
+*   [x] Music library browsing (Albums/Artists)
 *   [x] Basic playback engine
 *   [x] In-app playback controls (MiniPlayer)
 *   [x] Full-screen player UI

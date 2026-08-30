@@ -4,9 +4,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
+import com.acevflow.echo.ui.details.AlbumDetailScreen
+import com.acevflow.echo.ui.details.ArtistDetailScreen
 import com.acevflow.echo.ui.library.LibraryScreen
+import com.acevflow.echo.ui.library.albums.AlbumsScreen
+import com.acevflow.echo.ui.library.artists.ArtistsScreen
 import com.acevflow.echo.ui.player.PlayerScreen
 import com.acevflow.echo.ui.player.PlayerViewModel
 
@@ -17,14 +23,47 @@ fun NavGraph(
 ) {
     NavHost(
         navController = navController,
-        startDestination = Screen.Library.route,
+        startDestination = Screen.Songs.route,
         modifier = modifier
     ) {
-        composable(Screen.Library.route) {
+        composable(Screen.Songs.route) {
             LibraryScreen(viewModel = hiltViewModel())
+        }
+        composable(Screen.Albums.route) {
+            AlbumsScreen(
+                viewModel = hiltViewModel(),
+                onAlbumClick = { album ->
+                    navController.navigate(Screen.AlbumDetail.createRoute(album.id))
+                }
+            )
+        }
+        composable(Screen.Artists.route) {
+            ArtistsScreen(
+                viewModel = hiltViewModel(),
+                onArtistClick = { artist ->
+                    navController.navigate(Screen.ArtistDetail.createRoute(artist.name))
+                }
+            )
         }
         composable(Screen.Player.route) {
             PlayerScreen(viewModel = hiltViewModel())
+        }
+        composable(
+            route = Screen.AlbumDetail.route,
+            arguments = listOf(navArgument("albumId") { type = NavType.LongType })
+        ) {
+            AlbumDetailScreen(viewModel = hiltViewModel())
+        }
+        composable(
+            route = Screen.ArtistDetail.route,
+            arguments = listOf(navArgument("artistName") { type = NavType.StringType })
+        ) {
+            ArtistDetailScreen(
+                viewModel = hiltViewModel(),
+                onAlbumClick = { album ->
+                    navController.navigate(Screen.AlbumDetail.createRoute(album.id))
+                }
+            )
         }
     }
 }

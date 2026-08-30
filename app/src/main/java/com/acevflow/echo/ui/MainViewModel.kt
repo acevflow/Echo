@@ -13,6 +13,10 @@ class MainViewModel @Inject constructor(
     val isPlaying = mediaControllerManager.isPlaying
     val currentMediaItem = mediaControllerManager.currentMediaItem
 
+    init {
+        mediaControllerManager.initialize()
+    }
+
     fun resume() {
         mediaControllerManager.resume()
     }
