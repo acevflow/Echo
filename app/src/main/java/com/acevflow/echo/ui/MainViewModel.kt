@@ -17,6 +17,8 @@ class MainViewModel @Inject constructor(
     
     val themeMode = preferencesRepository.themeMode
     val dynamicColorEnabled = preferencesRepository.dynamicColorEnabled
+    
+    val sleepTimerMillisLeft = mediaControllerManager.sleepTimerMillisLeft
 
     init {
         mediaControllerManager.initialize()
@@ -28,5 +30,13 @@ class MainViewModel @Inject constructor(
 
     fun pause() {
         mediaControllerManager.pause()
+    }
+
+    fun startSleepTimer(minutes: Int) {
+        mediaControllerManager.startSleepTimer(minutes)
+    }
+
+    fun cancelSleepTimer() {
+        mediaControllerManager.cancelSleepTimer()
     }
 }

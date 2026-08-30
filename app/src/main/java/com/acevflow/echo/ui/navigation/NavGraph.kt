@@ -16,6 +16,7 @@ import com.acevflow.echo.ui.library.albums.AlbumsScreen
 import com.acevflow.echo.ui.library.artists.ArtistsScreen
 import com.acevflow.echo.ui.library.recent.RecentScreen
 import com.acevflow.echo.ui.playlists.PlaylistsScreen
+import com.acevflow.echo.ui.settings.EqualizerScreen
 import com.acevflow.echo.ui.settings.SettingsScreen
 import com.acevflow.echo.ui.player.PlayerScreen
 import com.acevflow.echo.ui.player.PlayerViewModel
@@ -73,10 +74,19 @@ fun NavGraph(
             )
         }
         composable(Screen.Settings.route) {
-            SettingsScreen(viewModel = hiltViewModel())
+            SettingsScreen(
+                viewModel = hiltViewModel(),
+                onNavigateToEqualizer = { navController.navigate(Screen.Equalizer.route) }
+            )
+        }
+        composable(Screen.Equalizer.route) {
+            EqualizerScreen(viewModel = hiltViewModel())
         }
         composable(Screen.Player.route) {
-            PlayerScreen(viewModel = hiltViewModel())
+            PlayerScreen(
+                viewModel = hiltViewModel(),
+                mainViewModel = hiltViewModel()
+            )
         }
         composable(
             route = Screen.AlbumDetail.route,

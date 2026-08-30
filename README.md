@@ -10,6 +10,8 @@ Echo aims to provide a high-quality local music playback experience with a moder
 
 The following features are implemented:
 
+*   **Audio Customization**: Built-in **5-band Equalizer** with frequency adjustment and persistent audio profiles.
+*   **Sleep Timer**: Automated playback control with customizable countdown intervals (15-60 minutes).
 *   **Personalization**: Customizable app appearance with **Light**, **Dark**, and **System** theme modes, plus **Dynamic Color** support (Android 12+).
 *   **Interactive Queue**: View and manage upcoming tracks via a dedicated **Queue Bottom Sheet**; support for "Play Next", "Add to Queue", and **Drag-and-Drop Reordering**.
 *   **Smart Collections**: Automated "Most Played" and "Recently Added" lists generated from your listening habits and device storage.
@@ -86,7 +88,7 @@ The project follows a standard Android structure within the `:app` module:
         *   *   `player/`: Full-screen playback interface.
         *   `queue/`: Interactive playback queue management (Bottom Sheet).
         *   `details/`: Detail screens for Albums, Artists, and Playlists.
-        *   `settings/`: App configuration and personalization UI.
+        *   `settings/`: App configuration, **Equalizer**, and personalization UI.
         *   `components/`: Shared UI elements like the MiniPlayer.
 *   `gradle/`: Version Catalog (`libs.versions.toml`) and wrapper configuration.
 
@@ -125,7 +127,9 @@ The project follows a standard Android structure within the `:app` module:
 *   [x] Smart collections (Most Played, Recently Added)
 *   [x] Advanced queue management (Play Next, Add to Queue, Reordering)
 *   [x] Customizable themes (Light/Dark/Dynamic)
-*   [ ] Audio quality settings
+*   [x] Audio customization (5-band Equalizer)
+*   [x] Sleep Timer
+*   [ ] Advanced audio transitions (Cross-fade)
 
 ## Contributing
 

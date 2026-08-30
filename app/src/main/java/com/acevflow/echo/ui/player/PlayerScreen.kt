@@ -1,6 +1,7 @@
 package com.acevflow.echo.ui.player
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -23,6 +24,9 @@ import androidx.compose.material.icons.filled.QueueMusic
 import androidx.compose.material.icons.filled.Shuffle
 import androidx.compose.material.icons.filled.SkipNext
 import androidx.compose.material.icons.filled.SkipPrevious
+import androidx.compose.material.icons.filled.Timer
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -48,12 +52,14 @@ import androidx.media3.common.Player
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.acevflow.echo.domain.util.TimeFormatter
+import com.acevflow.echo.ui.MainViewModel
 import com.acevflow.echo.ui.queue.QueueSheet
 import com.acevflow.echo.ui.queue.QueueViewModel
 
 @Composable
 fun PlayerScreen(
     viewModel: PlayerViewModel,
+    mainViewModel: MainViewModel,
     modifier: Modifier = Modifier
 ) {
     val currentMediaItem by viewModel.currentMediaItem.collectAsState()
@@ -63,8 +69,10 @@ fun PlayerScreen(
     val isFavorite by viewModel.isFavorite.collectAsState()
     val shuffleModeEnabled by viewModel.shuffleModeEnabled.collectAsState()
     val repeatMode by viewModel.repeatMode.collectAsState()
+    val sleepTimerMillis by mainViewModel.sleepTimerMillisLeft.collectAsState()
 
     var showQueueSheet by remember { mutableStateOf(false) }
+    var showTimerMenu by remember { mutableStateOf(false) }
 
     if (currentMediaItem == null) return
 
@@ -159,6 +167,39 @@ fun PlayerScreen(
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
+            Box {
+                IconButton(onClick = { showTimerMenu = true }) {
+                    Icon(
+                        imageVector = Icons.Default.Timer,
+                        contentDescription = "Sleep Timer",
+                        tint = if (sleepTimerMillis != null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                    )
+                }
+                DropdownMenu(
+                    expanded = showTimerMenu,
+                    onDismissRequest = { showTimerMenu = false }
+                ) {
+                    if (sleepTimerMillis != null) {
+                        DropdownMenuItem(
+                            text = { Text("Cancel Timer (${TimeFormatter.formatMs(sleepTimerMillis!!)})") },
+                            onClick = {
+                                mainViewModel.cancelSleepTimer()
+                                showTimerMenu = false
+                            }
+                        )
+                    }
+                    listOf(15, 30, 45, 60).forEach { mins ->
+                        DropdownMenuItem(
+                            text = { Text("$mins minutes") },
+                            onClick = {
+                                mainViewModel.startSleepTimer(mins)
+                                showTimerMenu = false
+                            }
+                        )
+                    }
+                }
+            }
+
             IconButton(onClick = { viewModel.toggleShuffle() }) {
                 Icon(
                     imageVector = Icons.Default.Shuffle,

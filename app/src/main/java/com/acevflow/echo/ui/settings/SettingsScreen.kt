@@ -1,5 +1,6 @@
 package com.acevflow.echo.ui.settings
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -23,6 +24,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun SettingsScreen(
     viewModel: SettingsViewModel,
+    onNavigateToEqualizer: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val themeMode by viewModel.themeMode.collectAsState(initial = 0)
@@ -39,6 +41,8 @@ fun SettingsScreen(
             color = MaterialTheme.colorScheme.primary,
             modifier = Modifier.padding(bottom = 16.dp)
         )
+        
+        // ... (rest of Appearance section)
 
         Text(
             text = "Theme",
@@ -75,6 +79,35 @@ fun SettingsScreen(
                 checked = dynamicColorEnabled,
                 onCheckedChange = { viewModel.setDynamicColorEnabled(it) }
             )
+        }
+
+        Spacer(modifier = Modifier.padding(vertical = 16.dp))
+
+        Text(
+            text = "Audio",
+            style = MaterialTheme.typography.titleLarge,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable(onClick = onNavigateToEqualizer)
+                .padding(vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "Equalizer",
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Text(
+                    text = "Configure audio bands and presets",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         }
     }
 }

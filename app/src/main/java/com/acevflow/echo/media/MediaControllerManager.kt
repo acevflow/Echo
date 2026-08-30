@@ -51,7 +51,17 @@ class MediaControllerManager @Inject constructor(
     private val _repeatMode = MutableStateFlow(Player.REPEAT_MODE_OFF)
     val repeatMode = _repeatMode.asStateFlow()
 
+    private val _equalizerEnabled = MutableStateFlow(false)
+    val equalizerEnabled = _equalizerEnabled.asStateFlow()
+
+    private val _equalizerBands = MutableStateFlow<Map<Int, Int>>(emptyMap())
+    val equalizerBands = _equalizerBands.asStateFlow()
+
+    private val _sleepTimerMillisLeft = MutableStateFlow<Long?>(null)
+    val sleepTimerMillisLeft = _sleepTimerMillisLeft.asStateFlow()
+
     private var progressJob: Job? = null
+    private var sleepTimerJob: Job? = null
     private val scope = CoroutineScope(Dispatchers.Main + Job())
 
     private val playerListener = object : Player.Listener {
@@ -115,6 +125,18 @@ class MediaControllerManager @Inject constructor(
                 preferencesRepository.repeatMode.collect { mode ->
                     controller?.repeatMode = mode
                     _repeatMode.value = mode
+                }
+            }
+
+            scope.launch {
+                preferencesRepository.equalizerEnabled.collect { enabled ->
+                    _equalizerEnabled.value = enabled
+                }
+            }
+
+            scope.launch {
+                preferencesRepository.equalizerBands.collect { bands ->
+                    _equalizerBands.value = bands
                 }
             }
 
@@ -227,6 +249,41 @@ class MediaControllerManager @Inject constructor(
             }
             it.repeatMode = nextMode
         }
+    }
+
+    fun toggleEqualizer() {
+        scope.launch {
+            preferencesRepository.setEqualizerEnabled(!_equalizerEnabled.value)
+        }
+    }
+
+    fun setEqualizerBand(band: Int, gain: Int) {
+        scope.launch {
+            preferencesRepository.setEqualizerBand(band, gain)
+        }
+    }
+
+    fun startSleepTimer(minutes: Int) {
+        sleepTimerJob?.cancel()
+        val totalMillis = minutes * 60 * 1000L
+        _sleepTimerMillisLeft.value = totalMillis
+
+        sleepTimerJob = scope.launch {
+            var remaining = totalMillis
+            while (remaining > 0) {
+                delay(1000)
+                remaining -= 1000
+                _sleepTimerMillisLeft.value = remaining
+            }
+            pause()
+            _sleepTimerMillisLeft.value = null
+        }
+    }
+
+    fun cancelSleepTimer() {
+        sleepTimerJob?.cancel()
+        sleepTimerJob = null
+        _sleepTimerMillisLeft.value = null
     }
 
     fun release() {
