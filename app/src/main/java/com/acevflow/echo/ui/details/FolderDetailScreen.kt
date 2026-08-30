@@ -17,6 +17,7 @@ import com.acevflow.echo.ui.library.SongList
 @Composable
 fun FolderDetailScreen(
     viewModel: FolderDetailViewModel,
+    onNavigateToEdit: (Long) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -47,7 +48,10 @@ fun FolderDetailScreen(
                     onSongClick = { index ->
                         viewModel.playSongs(state.songs, index)
                     },
-                    onAddToPlaylist = { /* Could be implemented */ }
+                    onAddToPlaylist = { /* Could be implemented */ },
+                    onEditInfo = { song ->
+                        onNavigateToEdit(song.id)
+                    }
                 )
             }
         }

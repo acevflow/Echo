@@ -16,6 +16,9 @@ interface MusicRepository {
     /** Returns a flow of all music tracks on the device. */
     fun getSongs(): Flow<List<Song>>
 
+    /** Returns a specific song by its ID. */
+    fun getSongById(songId: Long): Flow<Song?>
+
     /** Returns a flow of all albums on the device. */
     fun getAlbums(): Flow<List<Album>>
 
@@ -75,6 +78,21 @@ interface MusicRepository {
 
     /** Returns a flow of the most frequently played songs. */
     fun getMostPlayed(): Flow<List<Song>>
+
+    /** 
+     * Updates a song's metadata in the MediaStore.
+     */
+    suspend fun updateSongMetadata(songId: Long, title: String, artist: String, album: String)
+
+    /**
+     * Updates a song's artwork using a local image URI.
+     */
+    suspend fun updateSongArtwork(songId: Long, imageUri: android.net.Uri)
+
+    /**
+     * Creates a write request for a specific song ID on Android 11+.
+     */
+    suspend fun createWriteRequest(songId: Long): android.app.PendingIntent?
 
     // Search History
     /** Returns a flow of recent search queries. */

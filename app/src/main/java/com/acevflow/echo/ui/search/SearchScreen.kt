@@ -46,6 +46,7 @@ fun SearchScreen(
     viewModel: SearchViewModel,
     onAlbumClick: (Album) -> Unit,
     onArtistClick: (Artist) -> Unit,
+    onNavigateToEdit: (Long) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val query by viewModel.query.collectAsState()
@@ -108,7 +109,8 @@ fun SearchScreen(
                             artists = results.artists,
                             onSongClick = { viewModel.playSong(it) },
                             onAlbumClick = onAlbumClick,
-                            onArtistClick = onArtistClick
+                            onArtistClick = onArtistClick,
+                            onEditInfo = onNavigateToEdit
                         )
                     }
                 }
@@ -190,6 +192,7 @@ fun SearchContent(
     onSongClick: (Song) -> Unit,
     onAlbumClick: (Album) -> Unit,
     onArtistClick: (Artist) -> Unit,
+    onEditInfo: (Long) -> Unit,
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
@@ -206,7 +209,8 @@ fun SearchContent(
                     onClick = { onSongClick(song) },
                     onPlayNext = { viewModel.playNext(song) },
                     onAddToQueue = { viewModel.addToQueue(song) },
-                    onAddToPlaylist = { /* Could be implemented */ }
+                    onAddToPlaylist = { /* Could be implemented */ },
+                    onEditInfo = { onEditInfo(song.id) }
                 )
             }
         }

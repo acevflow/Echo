@@ -11,6 +11,7 @@ import com.acevflow.echo.data.local.dao.FavoriteSongDao
 import com.acevflow.echo.data.local.dao.PlaybackHistoryDao
 import com.acevflow.echo.data.local.dao.PlaylistDao
 import com.acevflow.echo.data.local.dao.SearchHistoryDao
+import com.acevflow.echo.data.local.dao.ArtworkOverrideDao
 import com.acevflow.echo.data.repository.MediaStoreMusicRepository
 import com.acevflow.echo.data.repository.MusicRepository
 import dagger.Binds
@@ -66,6 +67,12 @@ abstract class AppModule {
         @Singleton
         fun provideSearchHistoryDao(database: EchoDatabase): SearchHistoryDao {
             return database.searchHistoryDao()
+        }
+
+        @Provides
+        @Singleton
+        fun provideArtworkOverrideDao(database: EchoDatabase): ArtworkOverrideDao {
+            return database.artworkOverrideDao()
         }
 
         @Provides

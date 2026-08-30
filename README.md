@@ -20,6 +20,7 @@ Echo is built from the ground up using Jetpack Compose and modern Android archit
 *   **Search Intelligence**: Persistent **Search History** with interactive suggestions and one-tap filtering.
 *   **User Collections**: Create and manage custom **Playlists** and keep track of your **Favorites**.
 *   **Listening History**: Automatic tracking of your recently played tracks with manual management.
+*   **Metadata Editor**: In-app support for editing song information (Title, Artist, Album) and personalizing **Album Artwork**.
 
 ### Advanced Customization
 *   **Adaptive UI**: Responsive layouts optimized for **Phones**, **Tablets**, and **Foldables** using Window Size Classes.
@@ -71,11 +72,11 @@ For more detailed instructions, see the [Build & Installation guide](docs/build.
 
 ### Next Release
 - [ ] **Advanced Audio Transitions**: Implementation of true gapless playback and cross-fade support.
-- [ ] **Metadata Editor**: In-app support for editing audio file tags and album art.
+- [ ] **Wear OS Support**: Companion app for music control from your wrist.
 
 ### Future
 - [ ] **Enhanced Widgets**: Multiple widget sizes and customizable shortcut actions.
-- [ ] **Wear OS Support**: Companion app for music control from your wrist.
+- [ ] **Cloud Sync**: Optional, privacy-focused synchronization of playlists and favorites.
 
 ## Contributing
 

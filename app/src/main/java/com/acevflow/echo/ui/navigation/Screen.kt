@@ -11,6 +11,9 @@ sealed class Screen(val route: String) {
     data object Settings : Screen("settings")
     data object Equalizer : Screen("equalizer")
     data object Player : Screen("player")
+    data object EditSong : Screen("edit_song/{songId}") {
+        fun createRoute(songId: Long) = "edit_song/$songId"
+    }
     data object AlbumDetail : Screen("album_detail/{albumId}") {
         fun createRoute(albumId: Long) = "album_detail/$albumId"
     }

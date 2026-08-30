@@ -6,7 +6,7 @@ Echo follows **Clean Architecture** principles to ensure a modular, testable, an
 
 ### 1. Data Layer (`data/`)
 The data layer is responsible for retrieving and persisting data from various sources.
-- **`local/`**: Contains the Room database implementation, including DAOs and entities for Favorites, Playlists, Playback History, and **Search History**.
+- **`local/`**: Contains the Room database implementation, including DAOs and entities for Favorites, Playlists, Playback History, Search History, and **Artwork Overrides**.
 - **`preferences/`**: Implements Jetpack DataStore for reactive storage of user settings (e.g., Theme, Shuffle/Repeat modes, Equalizer bands).
 - **`repository/`**: Contains the implementations of the domain repositories.
     - `MediaStoreMusicRepository`: Discovers local music files using the Android MediaStore API and synchronizes them with the local database.

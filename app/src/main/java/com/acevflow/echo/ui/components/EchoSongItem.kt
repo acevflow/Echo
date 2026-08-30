@@ -43,6 +43,7 @@ fun EchoSongItem(
     onPlayNext: () -> Unit,
     onAddToQueue: () -> Unit,
     onAddToPlaylist: () -> Unit,
+    onEditInfo: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     var showMenu by remember { mutableStateOf(false) }
@@ -121,6 +122,13 @@ fun EchoSongItem(
                     text = { Text("Add to Queue") },
                     onClick = {
                         onAddToQueue()
+                        showMenu = false
+                    }
+                )
+                DropdownMenuItem(
+                    text = { Text("Edit Info") },
+                    onClick = {
+                        onEditInfo()
                         showMenu = false
                     }
                 )

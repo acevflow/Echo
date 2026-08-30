@@ -24,6 +24,7 @@ import com.acevflow.echo.ui.library.SongList
 @Composable
 fun RecentScreen(
     viewModel: RecentViewModel,
+    onNavigateToEdit: (Long) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -70,7 +71,10 @@ fun RecentScreen(
                             onSongClick = { index ->
                                 viewModel.playSongs(state.songs, index)
                             },
-                            onAddToPlaylist = { /* Could be implemented later */ }
+                            onAddToPlaylist = { /* Could be implemented later */ },
+                            onEditInfo = { song ->
+                                onNavigateToEdit(song.id)
+                            }
                         )
                     }
                 }

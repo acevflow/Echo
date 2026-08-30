@@ -22,6 +22,7 @@ import com.acevflow.echo.ui.library.SongList
 @Composable
 fun AlbumDetailScreen(
     viewModel: AlbumDetailViewModel,
+    onNavigateToEdit: (Long) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -57,6 +58,9 @@ fun AlbumDetailScreen(
                     },
                     onAddToPlaylist = { song ->
                         songForPlaylist = song
+                    },
+                    onEditInfo = { song ->
+                        onNavigateToEdit(song.id)
                     }
                 )
             }

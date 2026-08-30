@@ -38,6 +38,7 @@ import com.acevflow.echo.ui.theme.Dims
 @Composable
 fun LibraryScreen(
     viewModel: LibraryViewModel,
+    onNavigateToEdit: (Long) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -97,6 +98,9 @@ fun LibraryScreen(
                     },
                     onAddToPlaylist = { song ->
                         songForPlaylist = song
+                    },
+                    onEditInfo = { song ->
+                        onNavigateToEdit(song.id)
                     }
                 )
             }
@@ -121,6 +125,7 @@ fun SongList(
     songs: List<Song>,
     onSongClick: (Int) -> Unit,
     onAddToPlaylist: (Song) -> Unit,
+    onEditInfo: (Song) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
@@ -133,7 +138,8 @@ fun SongList(
                 onClick = { onSongClick(index) },
                 onPlayNext = { viewModel.playNext(song) },
                 onAddToQueue = { viewModel.addToQueue(song) },
-                onAddToPlaylist = { onAddToPlaylist(song) }
+                onAddToPlaylist = { onAddToPlaylist(song) },
+                onEditInfo = { onEditInfo(song) }
             )
             if (index < songs.size - 1) {
                 HorizontalDivider(

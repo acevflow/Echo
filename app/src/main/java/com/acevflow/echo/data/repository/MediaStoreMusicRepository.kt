@@ -1,17 +1,21 @@
 package com.acevflow.echo.data.repository
 
 import android.content.ContentUris
+import android.content.ContentValues
 import android.content.Context
+import android.os.Build
 import android.provider.MediaStore
 import androidx.core.net.toUri
 import com.acevflow.echo.data.local.dao.FavoriteSongDao
 import com.acevflow.echo.data.local.dao.PlaybackHistoryDao
 import com.acevflow.echo.data.local.dao.PlaylistDao
 import com.acevflow.echo.data.local.dao.SearchHistoryDao
+import com.acevflow.echo.data.local.dao.ArtworkOverrideDao
 import com.acevflow.echo.data.local.entity.FavoriteSong
 import com.acevflow.echo.data.local.entity.PlaybackHistory
 import com.acevflow.echo.data.local.entity.PlaylistSongCrossRef
 import com.acevflow.echo.data.local.entity.SearchHistory
+import com.acevflow.echo.data.local.entity.ArtworkOverride
 import com.acevflow.echo.domain.model.Album
 import com.acevflow.echo.domain.model.Artist
 import com.acevflow.echo.domain.model.Folder
@@ -39,17 +43,29 @@ class MediaStoreMusicRepository @Inject constructor(
     private val favoriteSongDao: FavoriteSongDao,
     private val playlistDao: PlaylistDao,
     private val historyDao: PlaybackHistoryDao,
-    private val searchHistoryDao: SearchHistoryDao
+    private val searchHistoryDao: SearchHistoryDao,
+    private val artworkOverrideDao: ArtworkOverrideDao
 ) : MusicRepository {
 
     override fun getSongs(): Flow<List<Song>> = combine(
         getMediaStoreSongs(null),
-        favoriteSongDao.getAllFavorites()
-    ) { mediaStoreSongs, favorites ->
-        val favoriteIds = favorites.map { it.songId }.toSet()
-        mediaStoreSongs.map { song ->
-            song.copy(isFavorite = favoriteIds.contains(song.id))
-        }
+        favoriteSongDao.getAllFavorites(),
+        artworkOverrideDao.getAllOverrides()
+    ) { mediaStoreSongs, favorites, overrides ->
+        applySongDecorations(mediaStoreSongs, favorites, overrides)
+    }.flowOn(Dispatchers.IO)
+
+    override fun getSongById(songId: Long): Flow<Song?> = combine(
+        getMediaStoreSongs("${MediaStore.Audio.Media._ID} = ?", arrayOf(songId.toString())),
+        favoriteSongDao.isFavorite(songId),
+        artworkOverrideDao.getAllOverrides()
+    ) { songs, isFavorite, overrides ->
+        val song = songs.firstOrNull() ?: return@combine null
+        val overrideMap = overrides.associate { it.songId to it.artworkUri.toUri() }
+        song.copy(
+            isFavorite = isFavorite,
+            artworkUri = overrideMap[songId] ?: song.artworkUri
+        )
     }.flowOn(Dispatchers.IO)
 
     override fun getAlbums(): Flow<List<Album>> = flow {
@@ -148,12 +164,10 @@ class MediaStoreMusicRepository @Inject constructor(
 
     override fun getSongsByAlbum(albumId: Long): Flow<List<Song>> = combine(
         getMediaStoreSongs("${MediaStore.Audio.Media.ALBUM_ID} = ?", arrayOf(albumId.toString())),
-        favoriteSongDao.getAllFavorites()
-    ) { mediaStoreSongs, favorites ->
-        val favoriteIds = favorites.map { it.songId }.toSet()
-        mediaStoreSongs.map { song ->
-            song.copy(isFavorite = favoriteIds.contains(song.id))
-        }
+        favoriteSongDao.getAllFavorites(),
+        artworkOverrideDao.getAllOverrides()
+    ) { mediaStoreSongs, favorites, overrides ->
+        applySongDecorations(mediaStoreSongs, favorites, overrides)
     }.flowOn(Dispatchers.IO)
 
     override fun getAlbumsByArtist(artistName: String): Flow<List<Album>> = flow {
@@ -197,12 +211,10 @@ class MediaStoreMusicRepository @Inject constructor(
 
     override fun getRecentlyAdded(): Flow<List<Song>> = combine(
         getMediaStoreSongs(null, null, "${MediaStore.Audio.Media.DATE_ADDED} DESC"),
-        favoriteSongDao.getAllFavorites()
-    ) { mediaStoreSongs, favorites ->
-        val favoriteIds = favorites.map { it.songId }.toSet()
-        mediaStoreSongs.take(50).map { song ->
-            song.copy(isFavorite = favoriteIds.contains(song.id))
-        }
+        favoriteSongDao.getAllFavorites(),
+        artworkOverrideDao.getAllOverrides()
+    ) { mediaStoreSongs, favorites, overrides ->
+        applySongDecorations(mediaStoreSongs.take(50), favorites, overrides)
     }.flowOn(Dispatchers.IO)
 
     override fun getMostPlayed(): Flow<List<Song>> = combine(
@@ -217,6 +229,50 @@ class MediaStoreMusicRepository @Inject constructor(
             .take(50)
             .mapNotNull { songMap[it.key] }
     }.flowOn(Dispatchers.IO)
+
+    override suspend fun updateSongMetadata(
+        songId: Long,
+        title: String,
+        artist: String,
+        album: String
+    ) {
+        val uri = ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, songId)
+        val values = ContentValues().apply {
+            put(MediaStore.Audio.Media.TITLE, title)
+            put(MediaStore.Audio.Media.ARTIST, artist)
+            put(MediaStore.Audio.Media.ALBUM, album)
+        }
+        try {
+            context.contentResolver.update(uri, values, null, null)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    override suspend fun updateSongArtwork(songId: Long, imageUri: android.net.Uri) {
+        artworkOverrideDao.insertOverride(ArtworkOverride(songId, imageUri.toString()))
+    }
+
+    override suspend fun createWriteRequest(songId: Long): android.app.PendingIntent? {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) return null
+        val uri = ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, songId)
+        return MediaStore.createWriteRequest(context.contentResolver, listOf(uri))
+    }
+
+    private fun applySongDecorations(
+        songs: List<Song>,
+        favorites: List<FavoriteSong>,
+        overrides: List<ArtworkOverride>
+    ): List<Song> {
+        val favoriteIds = favorites.map { it.songId }.toSet()
+        val overrideMap = overrides.associate { it.songId to it.artworkUri.toUri() }
+        return songs.map { song ->
+            song.copy(
+                isFavorite = favoriteIds.contains(song.id),
+                artworkUri = overrideMap[song.id] ?: song.artworkUri
+            )
+        }
+    }
 
     private fun getMediaStoreSongs(
         selection: String?,
@@ -288,12 +344,11 @@ class MediaStoreMusicRepository @Inject constructor(
 
     override fun getSongsByFolder(folderPath: String): Flow<List<Song>> = combine(
         getMediaStoreSongs("${MediaStore.Audio.Media.DATA} LIKE ?", arrayOf("$folderPath/%")),
-        favoriteSongDao.getAllFavorites()
-    ) { mediaStoreSongs, favorites ->
-        val favoriteIds = favorites.map { it.songId }.toSet()
-        mediaStoreSongs
-            .filter { it.parentPath == folderPath }
-            .map { song -> song.copy(isFavorite = favoriteIds.contains(song.id)) }
+        favoriteSongDao.getAllFavorites(),
+        artworkOverrideDao.getAllOverrides()
+    ) { mediaStoreSongs, favorites, overrides ->
+        val filtered = mediaStoreSongs.filter { it.parentPath == folderPath }
+        applySongDecorations(filtered, favorites, overrides)
     }.flowOn(Dispatchers.IO)
 
     override fun isFavorite(songId: Long): Flow<Boolean> = favoriteSongDao.isFavorite(songId)

@@ -18,6 +18,7 @@ import com.acevflow.echo.ui.library.artists.ArtistsScreen
 import com.acevflow.echo.ui.library.folders.FoldersScreen
 import com.acevflow.echo.ui.library.recent.RecentScreen
 import com.acevflow.echo.ui.playlists.PlaylistsScreen
+import com.acevflow.echo.ui.editor.EditSongScreen
 import com.acevflow.echo.ui.settings.EqualizerScreen
 import com.acevflow.echo.ui.settings.SettingsScreen
 import com.acevflow.echo.ui.player.PlayerScreen
@@ -35,7 +36,12 @@ fun NavGraph(
         modifier = modifier
     ) {
         composable(Screen.Songs.route) {
-            LibraryScreen(viewModel = hiltViewModel())
+            LibraryScreen(
+                viewModel = hiltViewModel(),
+                onNavigateToEdit = { songId ->
+                    navController.navigate(Screen.EditSong.createRoute(songId))
+                }
+            )
         }
         composable(Screen.Albums.route) {
             AlbumsScreen(
@@ -70,7 +76,12 @@ fun NavGraph(
             )
         }
         composable(Screen.Recent.route) {
-            RecentScreen(viewModel = hiltViewModel())
+            RecentScreen(
+                viewModel = hiltViewModel(),
+                onNavigateToEdit = { songId ->
+                    navController.navigate(Screen.EditSong.createRoute(songId))
+                }
+            )
         }
         composable(Screen.Search.route) {
             SearchScreen(
@@ -80,6 +91,9 @@ fun NavGraph(
                 },
                 onArtistClick = { artist ->
                     navController.navigate(Screen.ArtistDetail.createRoute(artist.name))
+                },
+                onNavigateToEdit = { songId ->
+                    navController.navigate(Screen.EditSong.createRoute(songId))
                 }
             )
         }
@@ -92,6 +106,15 @@ fun NavGraph(
         composable(Screen.Equalizer.route) {
             EqualizerScreen(viewModel = hiltViewModel())
         }
+        composable(
+            route = Screen.EditSong.route,
+            arguments = listOf(navArgument("songId") { type = NavType.LongType })
+        ) {
+            EditSongScreen(
+                viewModel = hiltViewModel(),
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
         composable(Screen.Player.route) {
             PlayerScreen(
                 viewModel = hiltViewModel(),
@@ -103,7 +126,12 @@ fun NavGraph(
             route = Screen.AlbumDetail.route,
             arguments = listOf(navArgument("albumId") { type = NavType.LongType })
         ) {
-            AlbumDetailScreen(viewModel = hiltViewModel())
+            AlbumDetailScreen(
+                viewModel = hiltViewModel(),
+                onNavigateToEdit = { songId ->
+                    navController.navigate(Screen.EditSong.createRoute(songId))
+                }
+            )
         }
         composable(
             route = Screen.ArtistDetail.route,
@@ -120,13 +148,23 @@ fun NavGraph(
             route = Screen.PlaylistDetail.route,
             arguments = listOf(navArgument("playlistId") { type = NavType.LongType })
         ) {
-            PlaylistDetailScreen(viewModel = hiltViewModel())
+            PlaylistDetailScreen(
+                viewModel = hiltViewModel(),
+                onNavigateToEdit = { songId ->
+                    navController.navigate(Screen.EditSong.createRoute(songId))
+                }
+            )
         }
         composable(
             route = Screen.FolderDetail.route,
             arguments = listOf(navArgument("folderPath") { type = NavType.StringType })
         ) {
-            FolderDetailScreen(viewModel = hiltViewModel())
+            FolderDetailScreen(
+                viewModel = hiltViewModel(),
+                onNavigateToEdit = { songId ->
+                    navController.navigate(Screen.EditSong.createRoute(songId))
+                }
+            )
         }
     }
 }
