@@ -15,14 +15,14 @@ Echo is built from the ground up using Jetpack Compose and modern Android archit
 *   **Interactive Controls**: Precision seeking, volume management, and instant skip controls.
 
 ### Library & Discovery
-*   **Hierarchical Browsing**: Organize your collection by **Songs**, **Albums**, **Artists**, or **Folders**.
-*   **Batch Management**: Efficiently manage your library with **Multi-Select** support and batch actions for playlists and the playback queue.
+*   **Hierarchical Browsing**: Organize your collection by **Songs**, **Albums**, **Artists**, **Genres**, or **Folders**.
+*   **Batch Management**: Efficiently manage your library with **Multi-Select** support and batch actions for playlists, the playback queue, and **Metadata Editing**.
 *   **Smart Discovery**: Dynamic "Most Played" and "Recently Added" collections that adapt to your habits.
 *   **Instant Search**: Real-time filtering across your entire library with immediate playback support.
 *   **Search Intelligence**: Persistent **Search History** with interactive suggestions and one-tap filtering.
 *   **User Collections**: Create and manage custom **Playlists** and keep track of your **Favorites**.
 *   **Listening History**: Automatic tracking of your recently played tracks with manual management.
-*   **Metadata Editor**: In-app support for editing song information (Title, Artist, Album) and personalizing **Album Artwork**.
+*   **Metadata Editor**: In-app support for editing song information (Title, Artist, Album) and personalizing **Album Artwork**; includes **Batch Editing** for multiple tracks.
 
 ### Advanced Customization
 *   **Adaptive UI**: Responsive layouts optimized for **Phones**, **Tablets**, and **Foldables** using Window Size Classes.
@@ -68,13 +68,17 @@ For more detailed instructions, see the [Build & Installation guide](docs/build.
 *   **Database**: Room (Relational persistence)
 *   **Settings**: Jetpack DataStore (Reactive preferences)
 *   **Media**: Jetpack Media3 (Audio engine & Session)
+*   **Performance**: Baseline Profiles (androidx.profileinstaller)
 *   **Widget**: Jetpack Glance
 *   **Image Loading**: Coil
 
 ## Roadmap
 
 ### Next Release
-- [ ] **Metadata Refinement**: Batch tag editing and advanced album art search.
+- [ ] **Visual Polish**: Animated artwork effects and custom transitions.
+- [ ] **Audio Refinement**: Enhanced equalizer presets and volume normalization.
+
+### Future
 - [ ] **Enhanced Widgets**: Multiple widget sizes and customizable shortcut actions.
 
 ### Future

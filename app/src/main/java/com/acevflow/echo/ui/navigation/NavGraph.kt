@@ -15,10 +15,12 @@ import androidx.navigation.navArgument
 import com.acevflow.echo.ui.details.AlbumDetailScreen
 import com.acevflow.echo.ui.details.ArtistDetailScreen
 import com.acevflow.echo.ui.details.FolderDetailScreen
+import com.acevflow.echo.ui.details.GenreDetailScreen
 import com.acevflow.echo.ui.details.PlaylistDetailScreen
 import com.acevflow.echo.ui.library.LibraryScreen
 import com.acevflow.echo.ui.library.albums.AlbumsScreen
 import com.acevflow.echo.ui.library.artists.ArtistsScreen
+import com.acevflow.echo.ui.library.genres.GenresScreen
 import com.acevflow.echo.ui.library.folders.FoldersScreen
 import com.acevflow.echo.ui.library.recent.RecentScreen
 import com.acevflow.echo.ui.playlists.PlaylistsScreen
@@ -68,6 +70,16 @@ fun NavGraph(
                     viewModel = hiltViewModel(),
                     onArtistClick = { artist ->
                         navController.navigate(Screen.ArtistDetail.createRoute(artist.name))
+                    }
+                )
+            }
+        }
+        composable(Screen.Genres.route) {
+            CompositionLocalProvider(LocalNavAnimatedVisibilityScope provides this) {
+                GenresScreen(
+                    viewModel = hiltViewModel(),
+                    onGenreClick = { genre ->
+                        navController.navigate(Screen.GenreDetail.createRoute(genre.id))
                     }
                 )
             }
@@ -190,6 +202,17 @@ fun NavGraph(
                     }
                 )
             }
+        }
+        composable(
+            route = Screen.GenreDetail.route,
+            arguments = listOf(navArgument("genreId") { type = NavType.LongType })
+        ) {
+            GenreDetailScreen(
+                viewModel = hiltViewModel(),
+                onNavigateToEdit = { songId ->
+                    navController.navigate(Screen.EditSong.createRoute(songId))
+                }
+            )
         }
     }
 }

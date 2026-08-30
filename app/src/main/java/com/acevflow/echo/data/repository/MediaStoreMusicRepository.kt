@@ -19,6 +19,7 @@ import com.acevflow.echo.data.local.entity.ArtworkOverride
 import com.acevflow.echo.domain.model.Album
 import com.acevflow.echo.domain.model.Artist
 import com.acevflow.echo.domain.model.Folder
+import com.acevflow.echo.domain.model.Genre
 import com.acevflow.echo.domain.model.Playlist
 import com.acevflow.echo.domain.model.Song
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -134,6 +135,36 @@ class MediaStoreMusicRepository @Inject constructor(
             }
         }
         emit(artists)
+    }.flowOn(Dispatchers.IO)
+
+    override fun getGenres(): Flow<List<Genre>> = flow {
+        val genres = mutableListOf<Genre>()
+        val collection = MediaStore.Audio.Genres.EXTERNAL_CONTENT_URI
+        val projection = arrayOf(
+            MediaStore.Audio.Genres._ID,
+            MediaStore.Audio.Genres.NAME
+        )
+
+        context.contentResolver.query(collection, projection, null, null, null)?.use { cursor ->
+            val idCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Genres._ID)
+            val nameCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Genres.NAME)
+
+            while (cursor.moveToNext()) {
+                val id = cursor.getLong(idCol)
+                val name = cursor.getString(nameCol) ?: "Unknown"
+                
+                // Get track count for this genre
+                val uri = MediaStore.Audio.Genres.Members.getContentUri("external", id)
+                val countCursor = context.contentResolver.query(uri, arrayOf(MediaStore.Audio.Media._ID), null, null, null)
+                val trackCount = countCursor?.count ?: 0
+                countCursor?.close()
+
+                if (trackCount > 0) {
+                    genres.add(Genre(id, name, trackCount))
+                }
+            }
+        }
+        emit(genres.sortedBy { it.name })
     }.flowOn(Dispatchers.IO)
 
     override fun getFolders(): Flow<List<Folder>> = flow {
@@ -253,10 +284,35 @@ class MediaStoreMusicRepository @Inject constructor(
         artworkOverrideDao.insertOverride(ArtworkOverride(songId, imageUri.toString()))
     }
 
+    override suspend fun updateBatchMetadata(songIds: List<Long>, artist: String?, album: String?) {
+        songIds.forEach { songId ->
+            val uri = ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, songId)
+            val values = ContentValues().apply {
+                artist?.let { put(MediaStore.Audio.Media.ARTIST, it) }
+                album?.let { put(MediaStore.Audio.Media.ALBUM, it) }
+            }
+            if (values.size() > 0) {
+                try {
+                    context.contentResolver.update(uri, values, null, null)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+        }
+    }
+
     override suspend fun createWriteRequest(songId: Long): android.app.PendingIntent? {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) return null
         val uri = ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, songId)
         return MediaStore.createWriteRequest(context.contentResolver, listOf(uri))
+    }
+
+    override suspend fun createBatchWriteRequest(songIds: List<Long>): android.app.PendingIntent? {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) return null
+        val uris = songIds.map { 
+            ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, it)
+        }
+        return MediaStore.createWriteRequest(context.contentResolver, uris)
     }
 
     private fun applySongDecorations(
@@ -350,6 +406,60 @@ class MediaStoreMusicRepository @Inject constructor(
         val filtered = mediaStoreSongs.filter { it.parentPath == folderPath }
         applySongDecorations(filtered, favorites, overrides)
     }.flowOn(Dispatchers.IO)
+
+    override fun getSongsByGenre(genreId: Long): Flow<List<Song>> = combine(
+        getMediaStoreSongsByGenre(genreId),
+        favoriteSongDao.getAllFavorites(),
+        artworkOverrideDao.getAllOverrides()
+    ) { mediaStoreSongs, favorites, overrides ->
+        applySongDecorations(mediaStoreSongs, favorites, overrides)
+    }.flowOn(Dispatchers.IO)
+
+    private fun getMediaStoreSongsByGenre(genreId: Long): Flow<List<Song>> = flow {
+        val songs = mutableListOf<Song>()
+        val uri = MediaStore.Audio.Genres.Members.getContentUri("external", genreId)
+        val projection = arrayOf(
+            MediaStore.Audio.Media._ID,
+            MediaStore.Audio.Media.TITLE,
+            MediaStore.Audio.Media.ARTIST,
+            MediaStore.Audio.Media.ALBUM,
+            MediaStore.Audio.Media.DURATION,
+            MediaStore.Audio.Media.ALBUM_ID,
+            MediaStore.Audio.Media.DATA
+        )
+
+        context.contentResolver.query(uri, projection, null, null, null)?.use { cursor ->
+            val idColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID)
+            val titleColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE)
+            val artistColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST)
+            val albumColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM)
+            val durationColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION)
+            val albumIdColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID)
+            val dataColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA)
+
+            while (cursor.moveToNext()) {
+                val id = cursor.getLong(idColumn)
+                val title = cursor.getString(titleColumn) ?: "Unknown Title"
+                val artist = cursor.getString(artistColumn) ?: "Unknown Artist"
+                val album = cursor.getString(albumColumn) ?: "Unknown Album"
+                val duration = cursor.getLong(durationColumn)
+                val albumId = cursor.getLong(albumIdColumn)
+                val data = cursor.getString(dataColumn)
+
+                val contentUri = ContentUris.withAppendedId(
+                    MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                    id
+                )
+                val artworkUri = ContentUris.withAppendedId(
+                    "content://media/external/audio/albumart".toUri(),
+                    albumId
+                )
+                val parentPath = data?.substringBeforeLast('/')
+                songs.add(Song(id, title, artist, album, duration, contentUri, artworkUri, false, parentPath))
+            }
+        }
+        emit(songs)
+    }
 
     override fun isFavorite(songId: Long): Flow<Boolean> = favoriteSongDao.isFavorite(songId)
 

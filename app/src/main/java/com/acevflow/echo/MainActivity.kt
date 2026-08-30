@@ -23,6 +23,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.PlaylistPlay
 import androidx.compose.material.icons.filled.Album
 import androidx.compose.material.icons.filled.Folder
+import androidx.compose.material.icons.filled.Style
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Restore
@@ -100,6 +101,7 @@ class MainActivity : ComponentActivity() {
                             Triple(Screen.Songs, "Songs", Icons.Default.MusicNote),
                             Triple(Screen.Albums, "Albums", Icons.Default.Album),
                             Triple(Screen.Artists, "Artists", Icons.Default.Person),
+                            Triple(Screen.Genres, "Genres", Icons.Default.Style),
                             Triple(Screen.Folders, "Folders", Icons.Default.Folder),
                             Triple(Screen.Playlists, "Playlists", Icons.AutoMirrored.Filled.PlaylistPlay),
                             Triple(Screen.Recent, "Recent", Icons.Default.Restore)

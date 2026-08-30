@@ -12,14 +12,17 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.PlaylistAdd
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.PlaylistAdd
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Queue
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
@@ -44,6 +47,8 @@ import androidx.compose.ui.unit.dp
 import com.acevflow.echo.domain.model.Playlist
 import com.acevflow.echo.domain.model.Song
 import com.acevflow.echo.ui.components.EchoSongItem
+import com.acevflow.echo.ui.editor.BatchEditViewModel
+import com.acevflow.echo.ui.editor.BatchEditUiState
 import com.acevflow.echo.ui.theme.Dims
 
 @Composable
@@ -58,6 +63,7 @@ fun LibraryScreen(
     
     var songForPlaylist by remember { mutableStateOf<Song?>(null) }
     var isBatchAddingToPlaylist by remember { mutableStateOf(false) }
+    var showBatchEditDialog by remember { mutableStateOf(false) }
     
     val permission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
         Manifest.permission.READ_MEDIA_AUDIO
@@ -118,7 +124,8 @@ fun LibraryScreen(
                                 selectedCount = selectedIds.size,
                                 onClear = { viewModel.clearSelection() },
                                 onAddToQueue = { viewModel.addSelectedToQueue(state.songs) },
-                                onAddToPlaylist = { isBatchAddingToPlaylist = true }
+                                onAddToPlaylist = { isBatchAddingToPlaylist = true },
+                                onEditInfo = { showBatchEditDialog = true }
                             )
                         }
 
@@ -168,6 +175,91 @@ fun LibraryScreen(
             }
         )
     }
+
+    if (showBatchEditDialog) {
+        BatchEditDialog(
+            viewModel = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel(),
+            selectedSongIds = selectedIds.toList(),
+            onDismiss = { showBatchEditDialog = false },
+            onSaved = {
+                showBatchEditDialog = false
+                viewModel.clearSelection()
+            }
+        )
+    }
+}
+
+@Composable
+fun BatchEditDialog(
+    viewModel: BatchEditViewModel,
+    selectedSongIds: List<Long>,
+    onDismiss: () -> Unit,
+    onSaved: () -> Unit
+) {
+    val artist by viewModel.artist.collectAsState()
+    val album by viewModel.album.collectAsState()
+    val pendingIntent by viewModel.pendingIntent.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
+
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartIntentSenderForResult()
+    ) { result ->
+        if (result.resultCode == android.app.Activity.RESULT_OK) {
+            viewModel.onPermissionGranted()
+        } else {
+            viewModel.onPermissionDenied()
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.setup(selectedSongIds)
+    }
+
+    LaunchedEffect(pendingIntent) {
+        pendingIntent?.let {
+            launcher.launch(androidx.activity.result.IntentSenderRequest.Builder(it.intentSender).build())
+        }
+    }
+
+    LaunchedEffect(uiState) {
+        if (uiState is BatchEditUiState.Saved) {
+            onSaved()
+        }
+    }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Edit ${selectedSongIds.size} Songs") },
+        text = {
+            Column {
+                androidx.compose.material3.OutlinedTextField(
+                    value = artist,
+                    onValueChange = viewModel::onArtistChange,
+                    label = { Text("Artist") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                androidx.compose.material3.OutlinedTextField(
+                    value = album,
+                    onValueChange = viewModel::onAlbumChange,
+                    label = { Text("Album") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = viewModel::saveChanges) {
+                Text("Save")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
 }
 
 @Composable
@@ -175,7 +267,8 @@ fun SelectionActionBar(
     selectedCount: Int,
     onClear: () -> Unit,
     onAddToQueue: () -> Unit,
-    onAddToPlaylist: () -> Unit
+    onAddToPlaylist: () -> Unit,
+    onEditInfo: () -> Unit
 ) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
@@ -194,11 +287,14 @@ fun SelectionActionBar(
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.weight(1f).padding(start = 8.dp)
             )
+            IconButton(onClick = onEditInfo) {
+                Icon(Icons.Default.Edit, contentDescription = "Edit Info")
+            }
             IconButton(onClick = onAddToQueue) {
                 Icon(Icons.Default.Queue, contentDescription = "Add to Queue")
             }
             IconButton(onClick = onAddToPlaylist) {
-                Icon(Icons.Default.PlaylistAdd, contentDescription = "Add to Playlist")
+                Icon(Icons.AutoMirrored.Filled.PlaylistAdd, contentDescription = "Add to Playlist")
             }
         }
     }

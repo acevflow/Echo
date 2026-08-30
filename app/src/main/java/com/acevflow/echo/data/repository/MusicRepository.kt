@@ -3,6 +3,7 @@ package com.acevflow.echo.data.repository
 import com.acevflow.echo.domain.model.Album
 import com.acevflow.echo.domain.model.Artist
 import com.acevflow.echo.domain.model.Folder
+import com.acevflow.echo.domain.model.Genre
 import com.acevflow.echo.domain.model.Playlist
 import com.acevflow.echo.domain.model.Song
 import kotlinx.coroutines.flow.Flow
@@ -25,6 +26,9 @@ interface MusicRepository {
     /** Returns a flow of all artists on the device. */
     fun getArtists(): Flow<List<Artist>>
 
+    /** Returns a flow of all genres on the device. */
+    fun getGenres(): Flow<List<Genre>>
+
     /** Returns a flow of physical folders containing music files. */
     fun getFolders(): Flow<List<Folder>>
 
@@ -36,6 +40,9 @@ interface MusicRepository {
 
     /** Returns a flow of songs within a physical directory path. */
     fun getSongsByFolder(folderPath: String): Flow<List<Song>>
+
+    /** Returns a flow of songs belonging to a specific genre ID. */
+    fun getSongsByGenre(genreId: Long): Flow<List<Song>>
 
     /** Returns a flow of the favorite status for a specific song ID. */
     fun isFavorite(songId: Long): Flow<Boolean>
@@ -85,6 +92,11 @@ interface MusicRepository {
     suspend fun updateSongMetadata(songId: Long, title: String, artist: String, album: String)
 
     /**
+     * Updates metadata for multiple songs in a single operation.
+     */
+    suspend fun updateBatchMetadata(songIds: List<Long>, artist: String?, album: String?)
+
+    /**
      * Updates a song's artwork using a local image URI.
      */
     suspend fun updateSongArtwork(songId: Long, imageUri: android.net.Uri)
@@ -93,6 +105,11 @@ interface MusicRepository {
      * Creates a write request for a specific song ID on Android 11+.
      */
     suspend fun createWriteRequest(songId: Long): android.app.PendingIntent?
+
+    /**
+     * Creates a write request for multiple song IDs on Android 11+.
+     */
+    suspend fun createBatchWriteRequest(songIds: List<Long>): android.app.PendingIntent?
 
     // Search History
     /** Returns a flow of recent search queries. */
