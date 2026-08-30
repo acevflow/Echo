@@ -10,6 +10,10 @@ import com.acevflow.echo.data.local.entity.PlaybackHistory
 import com.acevflow.echo.data.local.entity.Playlist
 import com.acevflow.echo.data.local.entity.PlaylistSongCrossRef
 
+/**
+ * Room database for Echo.
+ * Stores favorites, playlists, and playback history.
+ */
 @Database(
     entities = [
         FavoriteSong::class,

@@ -14,6 +14,10 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+/**
+ * ViewModel for the full-screen player.
+ * Manages detailed playback state, seeking, and favorite status for the current track.
+ */
 @HiltViewModel
 class PlayerViewModel @Inject constructor(
     private val musicRepository: MusicRepository,

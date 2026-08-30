@@ -2,8 +2,8 @@ package com.acevflow.echo.data.repository
 
 import android.content.ContentUris
 import android.content.Context
-import android.net.Uri
 import android.provider.MediaStore
+import androidx.core.net.toUri
 import com.acevflow.echo.data.local.dao.FavoriteSongDao
 import com.acevflow.echo.data.local.dao.PlaybackHistoryDao
 import com.acevflow.echo.data.local.dao.PlaylistDao
@@ -28,6 +28,10 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
+/**
+ * Implementation of [MusicRepository] that uses the Android MediaStore API to discover local music.
+ * It also integrates with Room DAOs for managing playlists, favorites, and history.
+ */
 class MediaStoreMusicRepository @Inject constructor(
     @ApplicationContext private val context: Context,
     private val favoriteSongDao: FavoriteSongDao,
@@ -65,7 +69,7 @@ class MediaStoreMusicRepository @Inject constructor(
             while (cursor.moveToNext()) {
                 val id = cursor.getLong(idCol)
                 val artworkUri = ContentUris.withAppendedId(
-                    Uri.parse("content://media/external/audio/albumart"),
+                    "content://media/external/audio/albumart".toUri(),
                     id
                 )
                 albums.add(
@@ -171,7 +175,7 @@ class MediaStoreMusicRepository @Inject constructor(
             while (cursor.moveToNext()) {
                 val id = cursor.getLong(idCol)
                 val artworkUri = ContentUris.withAppendedId(
-                    Uri.parse("content://media/external/audio/albumart"),
+                    "content://media/external/audio/albumart".toUri(),
                     id
                 )
                 albums.add(
@@ -226,7 +230,8 @@ class MediaStoreMusicRepository @Inject constructor(
             MediaStore.Audio.Media.ARTIST,
             MediaStore.Audio.Media.ALBUM,
             MediaStore.Audio.Media.DURATION,
-            MediaStore.Audio.Media.ALBUM_ID
+            MediaStore.Audio.Media.ALBUM_ID,
+            MediaStore.Audio.Media.DATA
         )
         
         val finalSelection = if (selection != null) {
@@ -249,6 +254,7 @@ class MediaStoreMusicRepository @Inject constructor(
             val albumColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM)
             val durationColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION)
             val albumIdColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID)
+            val dataColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA)
             
             while (cursor.moveToNext()) {
                 val id = cursor.getLong(idColumn)
@@ -257,6 +263,7 @@ class MediaStoreMusicRepository @Inject constructor(
                 val album = cursor.getString(albumColumn) ?: "Unknown Album"
                 val duration = cursor.getLong(durationColumn)
                 val albumId = cursor.getLong(albumIdColumn)
+                val data = cursor.getString(dataColumn)
                 
                 val contentUri = ContentUris.withAppendedId(
                     MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
@@ -264,11 +271,13 @@ class MediaStoreMusicRepository @Inject constructor(
                 )
                 
                 val artworkUri = ContentUris.withAppendedId(
-                    Uri.parse("content://media/external/audio/albumart"),
+                    "content://media/external/audio/albumart".toUri(),
                     albumId
                 )
                 
-                songs.add(Song(id, title, artist, album, duration, contentUri, artworkUri))
+                val parentPath = data?.substringBeforeLast('/')
+                
+                songs.add(Song(id, title, artist, album, duration, contentUri, artworkUri, false, parentPath))
             }
         }
         emit(songs)
@@ -279,10 +288,9 @@ class MediaStoreMusicRepository @Inject constructor(
         favoriteSongDao.getAllFavorites()
     ) { mediaStoreSongs, favorites ->
         val favoriteIds = favorites.map { it.songId }.toSet()
-        mediaStoreSongs.filter { it.contentUri.toString().substringBeforeLast('/') == folderPath } // More precise filter
-        mediaStoreSongs.map { song ->
-            song.copy(isFavorite = favoriteIds.contains(song.id))
-        }
+        mediaStoreSongs
+            .filter { it.parentPath == folderPath }
+            .map { song -> song.copy(isFavorite = favoriteIds.contains(song.id)) }
     }.flowOn(Dispatchers.IO)
 
     override fun isFavorite(songId: Long): Flow<Boolean> = favoriteSongDao.isFavorite(songId)
@@ -349,7 +357,6 @@ class MediaStoreMusicRepository @Inject constructor(
     }
 
     override suspend fun addSongToHistory(songId: Long) {
-        historyDao.deleteHistoryBySongId(songId) // Remove old entries for this song to bump it to top
         historyDao.insertHistoryEntry(PlaybackHistory(songId = songId))
     }
 

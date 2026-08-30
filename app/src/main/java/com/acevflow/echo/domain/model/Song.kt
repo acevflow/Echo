@@ -10,5 +10,6 @@ data class Song(
     val duration: Long,
     val contentUri: Uri,
     val artworkUri: Uri?,
-    val isFavorite: Boolean = false
+    val isFavorite: Boolean = false,
+    val parentPath: String? = null
 )

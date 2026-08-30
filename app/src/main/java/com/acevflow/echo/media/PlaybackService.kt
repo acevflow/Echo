@@ -16,9 +16,14 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+/**
+ * A [MediaSessionService] that manages the lifetime of an [ExoPlayer] and its [MediaSession].
+ * It handles background playback and provides a consistent interface for the Android system.
+ */
 @AndroidEntryPoint
 class PlaybackService : MediaSessionService() {
 
@@ -100,6 +105,9 @@ class PlaybackService : MediaSessionService() {
     }
 
     override fun onDestroy() {
+        serviceScope.cancel()
+        equalizer?.release()
+        equalizer = null
         mediaSession?.run {
             player.release()
             release()

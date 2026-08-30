@@ -21,6 +21,10 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/**
+ * A centralized manager that coordinates interaction between the UI and the [PlaybackService].
+ * It maintains the [MediaController] connection and exposes the current playback state as [kotlinx.coroutines.flow.StateFlow].
+ */
 @Singleton
 class MediaControllerManager @Inject constructor(
     @ApplicationContext private val context: Context,
@@ -60,6 +64,7 @@ class MediaControllerManager @Inject constructor(
     private val _sleepTimerMillisLeft = MutableStateFlow<Long?>(null)
     val sleepTimerMillisLeft = _sleepTimerMillisLeft.asStateFlow()
 
+    private var collectorsJob: Job? = null
     private var progressJob: Job? = null
     private var sleepTimerJob: Job? = null
     private val scope = CoroutineScope(Dispatchers.Main + Job())
@@ -90,6 +95,7 @@ class MediaControllerManager @Inject constructor(
         }
 
         override fun onShuffleModeEnabledChanged(shuffleModeEnabled: Boolean) {
+            if (_shuffleModeEnabled.value == shuffleModeEnabled) return
             _shuffleModeEnabled.value = shuffleModeEnabled
             scope.launch {
                 preferencesRepository.setShuffleModeEnabled(shuffleModeEnabled)
@@ -97,6 +103,7 @@ class MediaControllerManager @Inject constructor(
         }
 
         override fun onRepeatModeChanged(repeatMode: Int) {
+            if (_repeatMode.value == repeatMode) return
             _repeatMode.value = repeatMode
             scope.launch {
                 preferencesRepository.setRepeatMode(repeatMode)
@@ -115,28 +122,35 @@ class MediaControllerManager @Inject constructor(
             controller?.addListener(playerListener)
             
             // Restore states from preferences
-            scope.launch {
-                preferencesRepository.shuffleModeEnabled.collect { enabled ->
-                    controller?.shuffleModeEnabled = enabled
-                    _shuffleModeEnabled.value = enabled
+            collectorsJob?.cancel()
+            collectorsJob = scope.launch {
+                launch {
+                    preferencesRepository.shuffleModeEnabled.collect { enabled ->
+                        if (controller?.shuffleModeEnabled != enabled) {
+                            controller?.shuffleModeEnabled = enabled
+                        }
+                        _shuffleModeEnabled.value = enabled
+                    }
                 }
-            }
-            scope.launch {
-                preferencesRepository.repeatMode.collect { mode ->
-                    controller?.repeatMode = mode
-                    _repeatMode.value = mode
+                launch {
+                    preferencesRepository.repeatMode.collect { mode ->
+                        if (controller?.repeatMode != mode) {
+                            controller?.repeatMode = mode
+                        }
+                        _repeatMode.value = mode
+                    }
                 }
-            }
 
-            scope.launch {
-                preferencesRepository.equalizerEnabled.collect { enabled ->
-                    _equalizerEnabled.value = enabled
+                launch {
+                    preferencesRepository.equalizerEnabled.collect { enabled ->
+                        _equalizerEnabled.value = enabled
+                    }
                 }
-            }
 
-            scope.launch {
-                preferencesRepository.equalizerBands.collect { bands ->
-                    _equalizerBands.value = bands
+                launch {
+                    preferencesRepository.equalizerBands.collect { bands ->
+                        _equalizerBands.value = bands
+                    }
                 }
             }
 
@@ -288,6 +302,8 @@ class MediaControllerManager @Inject constructor(
 
     fun release() {
         stopProgressUpdate()
+        collectorsJob?.cancel()
+        collectorsJob = null
         _controller.value?.removeListener(playerListener)
         controllerFuture?.let {
             MediaController.releaseFuture(it)

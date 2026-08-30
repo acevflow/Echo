@@ -6,6 +6,10 @@ import com.acevflow.echo.media.MediaControllerManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
+/**
+ * Top-level ViewModel that provides global playback state and user preferences
+ * to the entire application shell.
+ */
 @HiltViewModel
 class MainViewModel @Inject constructor(
     private val mediaControllerManager: MediaControllerManager,
