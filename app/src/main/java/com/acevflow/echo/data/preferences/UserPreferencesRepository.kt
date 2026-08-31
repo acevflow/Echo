@@ -22,8 +22,10 @@ class UserPreferencesRepository @Inject constructor(
         val DYNAMIC_COLOR_ENABLED = booleanPreferencesKey("dynamic_color_enabled")
         val EQUALIZER_ENABLED = booleanPreferencesKey("equalizer_enabled")
         val EQUALIZER_BANDS = stringPreferencesKey("equalizer_bands") // Format: "band0:gain0,band1:gain1..."
+        val SELECTED_EQ_PRESET = stringPreferencesKey("selected_eq_preset")
         val CROSSFADE_DURATION = intPreferencesKey("crossfade_duration") // In seconds
         val EXCLUDED_FOLDERS = stringPreferencesKey("excluded_folders") // Comma-separated paths
+        val NORMALIZATION_ENABLED = booleanPreferencesKey("normalization_enabled")
     }
 
     val shuffleModeEnabled: Flow<Boolean> = dataStore.data.map { preferences ->
@@ -57,6 +59,10 @@ class UserPreferencesRepository @Inject constructor(
         }
     }
 
+    val selectedEqPreset: Flow<String?> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.SELECTED_EQ_PRESET]
+    }
+
     val crossfadeDuration: Flow<Int> = dataStore.data.map { preferences ->
         preferences[PreferencesKeys.CROSSFADE_DURATION] ?: 0 // Default 0 (disabled)
     }
@@ -65,6 +71,10 @@ class UserPreferencesRepository @Inject constructor(
         val foldersStr = preferences[PreferencesKeys.EXCLUDED_FOLDERS] ?: ""
         if (foldersStr.isEmpty()) emptySet()
         else foldersStr.split(",").toSet()
+    }
+
+    val normalizationEnabled: Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.NORMALIZATION_ENABLED] ?: false
     }
 
     suspend fun setShuffleModeEnabled(enabled: Boolean) {
@@ -108,6 +118,17 @@ class UserPreferencesRepository @Inject constructor(
 
             bandsMap[band] = gain
             preferences[PreferencesKeys.EQUALIZER_BANDS] = bandsMap.entries.joinToString(",") { "${it.key}:${it.value}" }
+            
+            // If user manually changes a band, the current preset is effectively "Custom" (or null)
+            preferences.remove(PreferencesKeys.SELECTED_EQ_PRESET)
+        }
+    }
+
+    suspend fun setEqualizerPreset(presetName: String, bands: List<Int>) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.SELECTED_EQ_PRESET] = presetName
+            val bandsMap = bands.mapIndexed { index, gain -> index to gain }.toMap()
+            preferences[PreferencesKeys.EQUALIZER_BANDS] = bandsMap.entries.joinToString(",") { "${it.key}:${it.value}" }
         }
     }
 
@@ -129,6 +150,12 @@ class UserPreferencesRepository @Inject constructor(
             }
             
             preferences[PreferencesKeys.EXCLUDED_FOLDERS] = currentSet.joinToString(",")
+        }
+    }
+
+    suspend fun setNormalizationEnabled(enabled: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.NORMALIZATION_ENABLED] = enabled
         }
     }
 }

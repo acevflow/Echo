@@ -29,7 +29,7 @@ Echo is built from the ground up using Jetpack Compose and modern Android archit
 *   **Adaptive UI**: Responsive layouts optimized for **Phones**, **Tablets**, and **Foldables** using Window Size Classes.
 *   **Visual Fluidity**: Premium experience with **Shared Element Transitions** that provide visual continuity during navigation.
 *   **Interactive Queue**: Manage upcoming tracks via a dedicated Bottom Sheet with **drag-and-drop reordering**.
-*   **Professional Audio**: Built-in **5-band Equalizer** with frequency adjustment and persistent audio profiles.
+*   **Professional Audio**: Built-in **5-band Equalizer** with frequency adjustment, **Presets**, and persistent audio profiles; includes **Volume Normalization** (DynamicsProcessing) for a balanced acoustic experience.
 *   **Automation**: Integrated **Sleep Timer** with customizable intervals to automatically stop playback.
 *   **Synchronized Lyrics**: Support for both embedded and external `.lrc` sidecar files with reactive, auto-scrolling display.
 *   **Dynamic UI**: Full support for **Light/Dark/System** modes and **Material You Dynamic Color** (Android 12+).
@@ -77,8 +77,8 @@ For more detailed instructions, see the [Build & Installation guide](docs/build.
 ## Roadmap
 
 ### Next Release
-- [ ] **Audio Refinement**: Enhanced equalizer presets and volume normalization (DynamicsProcessing).
 - [ ] **Visual Polish**: Animated artwork effects and custom transition curves.
+- [ ] **Enhanced Discovery**: Personal year-in-review and advanced library statistics.
 
 ### Future
 - [ ] **Cloud Sync**: Optional, privacy-focused synchronization of playlists and favorites.

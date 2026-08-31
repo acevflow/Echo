@@ -38,6 +38,7 @@ fun SettingsScreen(
     val themeMode by viewModel.themeMode.collectAsState(initial = 0)
     val dynamicColorEnabled by viewModel.dynamicColorEnabled.collectAsState(initial = true)
     val crossfadeDuration by viewModel.crossfadeDuration.collectAsState(initial = 0)
+    val normalizationEnabled by viewModel.normalizationEnabled.collectAsState(initial = false)
 
     Surface(
         modifier = modifier.fillMaxSize(),
@@ -128,6 +129,29 @@ fun SettingsScreen(
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.padding(bottom = Dims.ElementPadding)
             )
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = Dims.ElementPadding),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "Volume Normalization",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    Text(
+                        text = "Balance audio levels between tracks",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                Switch(
+                    checked = normalizationEnabled,
+                    onCheckedChange = { viewModel.setNormalizationEnabled(it) }
+                )
+            }
 
             Surface(
                 modifier = Modifier

@@ -18,6 +18,7 @@ class SettingsViewModel @Inject constructor(
     val dynamicColorEnabled = preferencesRepository.dynamicColorEnabled
     val crossfadeDuration = preferencesRepository.crossfadeDuration
     val excludedFolders = preferencesRepository.excludedFolders
+    val normalizationEnabled = preferencesRepository.normalizationEnabled
 
     val allFolders = musicRepository.getFolders()
 
@@ -42,6 +43,12 @@ class SettingsViewModel @Inject constructor(
     fun toggleFolderExclusion(folderPath: String) {
         viewModelScope.launch {
             preferencesRepository.toggleFolderExclusion(folderPath)
+        }
+    }
+
+    fun setNormalizationEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            preferencesRepository.setNormalizationEnabled(enabled)
         }
     }
 }
