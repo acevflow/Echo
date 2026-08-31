@@ -1,5 +1,7 @@
 package com.acevflow.echo.ui.search
 
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.draw.shadow
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,6 +32,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.acevflow.echo.domain.model.Album
 import com.acevflow.echo.domain.model.Artist
@@ -64,14 +67,28 @@ fun SearchScreen(
                 onSearch = { },
                 active = false,
                 onActiveChange = { },
-                placeholder = { Text("Search your library") },
-                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                placeholder = { 
+                    Text(
+                        text = "Search your library",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                    ) 
+                },
+                leadingIcon = { 
+                    Icon(
+                        imageVector = Icons.Default.Search, 
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary
+                    ) 
+                },
                 colors = SearchBarDefaults.colors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                    containerColor = MaterialTheme.colorScheme.surface,
                 ),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(Dims.ScreenPadding)
+                    .padding(horizontal = Dims.ScreenPadding)
+                    .padding(top = 16.dp, bottom = 8.dp)
+                    .shadow(12.dp, CircleShape)
             ) { }
 
             Box(modifier = Modifier.fillMaxSize()) {
@@ -250,9 +267,9 @@ fun SectionHeader(
 ) {
     Text(
         text = title,
-        style = MaterialTheme.typography.titleLarge,
-        fontWeight = FontWeight.Bold,
-        color = MaterialTheme.colorScheme.primary,
+        style = MaterialTheme.typography.titleLarge.copy(fontSize = 20.sp),
+        fontWeight = FontWeight.ExtraBold,
+        color = MaterialTheme.colorScheme.onBackground,
         modifier = modifier.padding(horizontal = Dims.ScreenPadding, vertical = Dims.ElementPadding)
     )
 }

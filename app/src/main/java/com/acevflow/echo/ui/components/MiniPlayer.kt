@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Pause
@@ -62,12 +63,12 @@ fun MiniPlayer(
     Surface(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = Dims.ElementPadding, vertical = Dims.TinyPadding)
-            .shadow(12.dp, RoundedCornerShape(Dims.CardRadius))
+            .padding(horizontal = Dims.ScreenPadding, vertical = Dims.TinyPadding)
+            .shadow(20.dp, RoundedCornerShape(Dims.CardRadius))
             .clip(RoundedCornerShape(Dims.CardRadius))
             .clickable(onClick = onClick),
         color = MaterialTheme.colorScheme.surface,
-        tonalElevation = 0.dp
+        tonalElevation = 4.dp
     ) {
         Column {
             Row(
@@ -78,7 +79,7 @@ fun MiniPlayer(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 val imageModifier = Modifier
-                    .size(52.dp)
+                    .size(56.dp)
                     .clip(RoundedCornerShape(Dims.SmallRadius))
 
                 Box {
@@ -111,7 +112,7 @@ fun MiniPlayer(
                     Text(
                         text = currentMediaItem?.mediaMetadata?.artist?.toString() ?: "Unknown Artist",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -126,7 +127,7 @@ fun MiniPlayer(
                     Icon(
                         imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
                         contentDescription = if (isPlaying) "Pause" else "Play",
-                        modifier = Modifier.size(Dims.IconMedium),
+                        modifier = Modifier.size(32.dp),
                         tint = MaterialTheme.colorScheme.primary
                     )
                 }
@@ -136,16 +137,16 @@ fun MiniPlayer(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = Dims.SmallPadding)
-                    .padding(bottom = Dims.TinyPadding)
+                    .padding(bottom = 6.dp)
             ) {
                 LinearProgressIndicator(
                     progress = { progress },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(3.dp)
-                        .clip(RoundedCornerShape(2.dp)),
+                        .clip(CircleShape),
                     color = MaterialTheme.colorScheme.primary,
-                    trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                    trackColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
                     strokeCap = StrokeCap.Round
                 )
             }

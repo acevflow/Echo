@@ -107,13 +107,10 @@ class MainActivity : ComponentActivity() {
                         val currentMediaItem by mainViewModel.currentMediaItem.collectAsState()
 
                         val items = listOf(
-                            Triple(Screen.Songs, "Songs", Icons.Default.MusicNote),
-                            Triple(Screen.Albums, "Albums", Icons.Default.Album),
-                            Triple(Screen.Artists, "Artists", Icons.Default.Person),
-                            Triple(Screen.Genres, "Genres", Icons.Default.Style),
-                            Triple(Screen.Folders, "Folders", Icons.Default.Folder),
+                            Triple(Screen.Songs, "Library", Icons.Default.MusicNote),
+                            Triple(Screen.Search, "Search", Icons.Default.Search),
                             Triple(Screen.Playlists, "Playlists", Icons.AutoMirrored.Filled.PlaylistPlay),
-                            Triple(Screen.Recent, "Recent", Icons.Default.Restore)
+                            Triple(Screen.Settings, "Settings", Icons.Default.Settings)
                         )
 
                         Scaffold(
@@ -126,17 +123,9 @@ class MainActivity : ComponentActivity() {
                                         title = { 
                                             Text(
                                                 text = "Echo",
-                                                style = MaterialTheme.typography.displayLarge.copy(fontSize = 28.sp),
+                                                style = MaterialTheme.typography.displayLarge.copy(fontSize = 24.sp),
                                                 color = MaterialTheme.colorScheme.onBackground
                                             ) 
-                                        },
-                                        actions = {
-                                            IconButton(onClick = { navController.navigate(Screen.Search.route) }) {
-                                                Icon(Icons.Default.Search, contentDescription = "Search")
-                                            }
-                                            IconButton(onClick = { navController.navigate(Screen.Settings.route) }) {
-                                                Icon(Icons.Default.Settings, contentDescription = "Settings")
-                                            }
                                         },
                                         colors = TopAppBarDefaults.topAppBarColors(
                                             containerColor = MaterialTheme.colorScheme.background,

@@ -6,9 +6,26 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.filled.Album
+import androidx.compose.material.icons.filled.Folder
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Restore
+import androidx.compose.material.icons.filled.Style
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.filled.Album
+import androidx.compose.material.icons.filled.Folder
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Restore
+import androidx.compose.material.icons.filled.Style
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -59,6 +76,11 @@ import com.acevflow.echo.ui.theme.Dims
 fun LibraryScreen(
     viewModel: LibraryViewModel,
     onNavigateToEdit: (Long) -> Unit,
+    onNavigateToAlbums: () -> Unit,
+    onNavigateToArtists: () -> Unit,
+    onNavigateToGenres: () -> Unit,
+    onNavigateToFolders: () -> Unit,
+    onNavigateToRecent: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -108,28 +130,41 @@ fun LibraryScreen(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             modifier = Modifier.padding(Dims.ScreenPadding)
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.MusicNote,
-                                contentDescription = null,
-                                modifier = Modifier.size(64.dp).padding(bottom = 16.dp),
-                                tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
-                            )
+                            Surface(
+                                shape = CircleShape,
+                                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                                modifier = Modifier.size(120.dp)
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Icon(
+                                        imageVector = Icons.Default.MusicNote,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(48.dp),
+                                        tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
+                                    )
+                                }
+                            }
+                            Spacer(modifier = Modifier.height(24.dp))
                             Text(
                                 text = "Your library is empty",
-                                style = MaterialTheme.typography.titleLarge,
-                                textAlign = TextAlign.Center
+                                style = MaterialTheme.typography.headlineMedium,
+                                textAlign = TextAlign.Center,
+                                fontWeight = FontWeight.ExtraBold
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
-                                text = "Add music files to your device to start listening.",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                text = "Connect to your device's music files to start your journey.",
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                                 textAlign = TextAlign.Center
                             )
                         }
                     }
                 }
                 is LibraryUiState.Success -> {
+                    var visible by remember { mutableStateOf(false) }
+                    LaunchedEffect(Unit) { visible = true }
+                    
                     Column(modifier = Modifier.fillMaxSize()) {
                         AnimatedVisibility(
                             visible = selectedIds.isNotEmpty(),
@@ -145,27 +180,40 @@ fun LibraryScreen(
                             )
                         }
 
-                        SongList(
-                            viewModel = viewModel,
-                            songs = state.songs,
-                            selectedIds = selectedIds,
-                            onSongClick = { index -> 
-                                if (selectedIds.isNotEmpty()) {
+                        androidx.compose.animation.AnimatedVisibility(
+                            visible = visible,
+                            enter = fadeIn(animationSpec = tween(600)) + slideInVertically(
+                                animationSpec = tween(600),
+                                initialOffsetY = { it / 10 }
+                            )
+                        ) {
+                            SongList(
+                                viewModel = viewModel,
+                                songs = state.songs,
+                                selectedIds = selectedIds,
+                                onSongClick = { index -> 
+                                    if (selectedIds.isNotEmpty()) {
+                                        viewModel.toggleSelection(state.songs[index].id)
+                                    } else {
+                                        viewModel.playSongs(state.songs, index)
+                                    }
+                                },
+                                onLongClick = { index ->
                                     viewModel.toggleSelection(state.songs[index].id)
-                                } else {
-                                    viewModel.playSongs(state.songs, index)
-                                }
-                            },
-                            onLongClick = { index ->
-                                viewModel.toggleSelection(state.songs[index].id)
-                            },
-                            onAddToPlaylist = { song ->
-                                songForPlaylist = song
-                            },
-                            onEditInfo = { song ->
-                                onNavigateToEdit(song.id)
-                            }
-                        )
+                                },
+                                onAddToPlaylist = { song ->
+                                    songForPlaylist = song
+                                },
+                                onEditInfo = { song ->
+                                    onNavigateToEdit(song.id)
+                                },
+                                onNavigateToAlbums = onNavigateToAlbums,
+                                onNavigateToArtists = onNavigateToArtists,
+                                onNavigateToGenres = onNavigateToGenres,
+                                onNavigateToFolders = onNavigateToFolders,
+                                onNavigateToRecent = onNavigateToRecent
+                            )
+                        }
                     }
                 }
             }
@@ -325,12 +373,31 @@ fun SongList(
     onLongClick: (Int) -> Unit = {},
     onAddToPlaylist: (Song) -> Unit,
     onEditInfo: (Song) -> Unit = {},
+    onNavigateToAlbums: (() -> Unit)? = null,
+    onNavigateToArtists: (() -> Unit)? = null,
+    onNavigateToGenres: (() -> Unit)? = null,
+    onNavigateToFolders: (() -> Unit)? = null,
+    onNavigateToRecent: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
         modifier = modifier.fillMaxSize(),
         contentPadding = PaddingValues(bottom = Dims.MiniPlayerHeight + Dims.ScreenPadding)
     ) {
+        if (onNavigateToAlbums != null && onNavigateToArtists != null && 
+            onNavigateToGenres != null && onNavigateToFolders != null && 
+            onNavigateToRecent != null) {
+            item {
+                LibraryNavigationHeader(
+                    onNavigateToAlbums = onNavigateToAlbums,
+                    onNavigateToArtists = onNavigateToArtists,
+                    onNavigateToGenres = onNavigateToGenres,
+                    onNavigateToFolders = onNavigateToFolders,
+                    onNavigateToRecent = onNavigateToRecent
+                )
+            }
+        }
+
         itemsIndexed(songs, key = { _, song -> song.id }) { index, song ->
             EchoSongItem(
                 song = song,
@@ -342,13 +409,6 @@ fun SongList(
                 onAddToPlaylist = { onAddToPlaylist(song) },
                 onEditInfo = { onEditInfo(song) }
             )
-            if (index < songs.size - 1) {
-                HorizontalDivider(
-                    modifier = Modifier.padding(horizontal = Dims.ElementPadding),
-                    thickness = 0.5.dp,
-                    color = DividerColor
-                )
-            }
         }
     }
 }
@@ -388,4 +448,58 @@ fun AddToPlaylistDialog(
             }
         }
     )
+}
+
+@Composable
+fun LibraryNavigationHeader(
+    onNavigateToAlbums: () -> Unit,
+    onNavigateToArtists: () -> Unit,
+    onNavigateToGenres: () -> Unit,
+    onNavigateToFolders: () -> Unit,
+    onNavigateToRecent: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = Dims.ElementPadding)
+            .padding(horizontal = Dims.ScreenPadding),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        LibraryNavButton(icon = Icons.Default.Album, label = "Albums", onClick = onNavigateToAlbums)
+        LibraryNavButton(icon = Icons.Default.Person, label = "Artists", onClick = onNavigateToArtists)
+        LibraryNavButton(icon = Icons.Default.Style, label = "Genres", onClick = onNavigateToGenres)
+        LibraryNavButton(icon = Icons.Default.Folder, label = "Folders", onClick = onNavigateToFolders)
+        LibraryNavButton(icon = Icons.Default.Restore, label = "Recent", onClick = onNavigateToRecent)
+    }
+}
+
+@Composable
+fun LibraryNavButton(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    label: String,
+    onClick: () -> Unit
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.clickable(onClick = onClick)
+    ) {
+        Surface(
+            shape = CircleShape,
+            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+            modifier = Modifier.size(48.dp)
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = label,
+                modifier = Modifier.padding(12.dp),
+                tint = MaterialTheme.colorScheme.primary
+            )
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodySmall,
+            fontWeight = FontWeight.Medium
+        )
+    }
 }

@@ -51,7 +51,12 @@ fun NavGraph(
                     viewModel = hiltViewModel(),
                     onNavigateToEdit = { songId ->
                         navController.navigate(Screen.EditSong.createRoute(songId))
-                    }
+                    },
+                    onNavigateToAlbums = { navController.navigate(Screen.Albums.route) },
+                    onNavigateToArtists = { navController.navigate(Screen.Artists.route) },
+                    onNavigateToGenres = { navController.navigate(Screen.Genres.route) },
+                    onNavigateToFolders = { navController.navigate(Screen.Folders.route) },
+                    onNavigateToRecent = { navController.navigate(Screen.Recent.route) }
                 )
             }
         }

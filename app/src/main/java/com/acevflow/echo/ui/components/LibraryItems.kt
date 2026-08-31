@@ -35,31 +35,40 @@ fun EchoAlbumItem(
     album: Album,
     modifier: Modifier = Modifier
 ) {
-    Column(modifier = modifier.fillMaxWidth()) {
-        AsyncImage(
-            model = album.artworkUri,
-            contentDescription = null,
-            modifier = Modifier
-                .fillMaxWidth()
-                .aspectRatio(1f)
-                .shadow(8.dp, RoundedCornerShape(Dims.CardRadius))
-                .clip(RoundedCornerShape(Dims.CardRadius)),
-            contentScale = ContentScale.Crop
-        )
-        Text(
-            text = album.title,
-            style = MaterialTheme.typography.titleMedium,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.padding(top = Dims.SmallPadding)
-        )
-        Text(
-            text = album.artist,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
+    Surface(
+        modifier = modifier
+            .fillMaxWidth()
+            .shadow(4.dp, RoundedCornerShape(Dims.CardRadius))
+            .clip(RoundedCornerShape(Dims.CardRadius)),
+        color = Color.Transparent
+    ) {
+        Column(modifier = Modifier.padding(bottom = 8.dp)) {
+            AsyncImage(
+                model = album.artworkUri,
+                contentDescription = null,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(1f)
+                    .clip(RoundedCornerShape(Dims.CardRadius)),
+                contentScale = ContentScale.Crop
+            )
+            Column(modifier = Modifier.padding(horizontal = Dims.SmallPadding, vertical = 8.dp)) {
+                Text(
+                    text = album.title,
+                    style = MaterialTheme.typography.titleMedium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = album.artist,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        }
     }
 }
 
@@ -68,47 +77,54 @@ fun EchoArtistItem(
     artist: Artist,
     modifier: Modifier = Modifier
 ) {
-    Row(
+    Surface(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = Dims.ElementPadding, vertical = Dims.SmallPadding),
-        verticalAlignment = Alignment.CenterVertically
+            .padding(horizontal = Dims.ScreenPadding, vertical = 4.dp)
+            .clip(RoundedCornerShape(Dims.SmallRadius)),
+        color = Color.Transparent
     ) {
-        Surface(
-            modifier = Modifier
-                .size(64.dp)
-                .shadow(4.dp, CircleShape)
-                .clip(CircleShape),
-            color = MaterialTheme.colorScheme.surfaceVariant
+        Row(
+            modifier = Modifier.padding(Dims.SmallPadding),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Box(contentAlignment = Alignment.Center) {
-                Icon(
-                    imageVector = Icons.Default.Person,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(Dims.IconMedium)
+            Surface(
+                modifier = Modifier
+                    .size(56.dp)
+                    .shadow(2.dp, CircleShape)
+                    .clip(CircleShape),
+                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        imageVector = Icons.Default.Person,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(28.dp)
+                    )
+                }
+            }
+            
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(start = Dims.ElementPadding)
+            ) {
+                Text(
+                    text = artist.name,
+                    style = MaterialTheme.typography.titleMedium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = "${artist.albumCount} albums • ${artist.trackCount} songs",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
-        }
-        
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .padding(start = Dims.ElementPadding)
-        ) {
-            Text(
-                text = artist.name,
-                style = MaterialTheme.typography.titleMedium,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            Text(
-                text = "${artist.albumCount} albums • ${artist.trackCount} songs",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
         }
     }
 }

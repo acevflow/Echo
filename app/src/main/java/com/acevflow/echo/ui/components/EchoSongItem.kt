@@ -62,121 +62,127 @@ fun EchoSongItem(
     val sharedTransitionScope = LocalSharedTransitionScope.current
     val animatedVisibilityScope = LocalNavAnimatedVisibilityScope.current
 
-    Row(
+    Surface(
         modifier = modifier
             .fillMaxWidth()
-            .background(if (isSelected) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f) else Color.Transparent)
+            .padding(horizontal = Dims.ScreenPadding, vertical = 4.dp)
+            .shadow(if (isSelected) 4.dp else 0.dp, RoundedCornerShape(Dims.SmallRadius))
+            .clip(RoundedCornerShape(Dims.SmallRadius))
             .combinedClickable(
                 onClick = onClick,
                 onLongClick = onLongClick
-            )
-            .padding(horizontal = Dims.ElementPadding, vertical = Dims.SmallPadding),
-        verticalAlignment = Alignment.CenterVertically
+            ),
+        color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else Color.Transparent,
+        tonalElevation = if (isSelected) 4.dp else 0.dp
     ) {
-        Box(contentAlignment = Alignment.Center) {
-            val imageModifier = Modifier
-                .size(Dims.ArtworkSmall)
-                .shadow(4.dp, RoundedCornerShape(Dims.SmallRadius))
-                .clip(RoundedCornerShape(Dims.SmallRadius))
-            
-            AsyncImage(
-                model = song.artworkUri,
-                contentDescription = null,
-                modifier = if (sharedTransitionScope != null && animatedVisibilityScope != null) {
-                    with(sharedTransitionScope) {
-                        imageModifier.sharedBounds(
-                            rememberSharedContentState(key = "artwork_${song.id}"),
-                            animatedVisibilityScope = animatedVisibilityScope
+        Row(
+            modifier = Modifier.padding(Dims.SmallPadding),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                val imageModifier = Modifier
+                    .size(Dims.ArtworkSmall)
+                    .clip(RoundedCornerShape(Dims.SmallRadius))
+                
+                AsyncImage(
+                    model = song.artworkUri,
+                    contentDescription = null,
+                    modifier = if (sharedTransitionScope != null && animatedVisibilityScope != null) {
+                        with(sharedTransitionScope) {
+                            imageModifier.sharedBounds(
+                                rememberSharedContentState(key = "artwork_${song.id}"),
+                                animatedVisibilityScope = animatedVisibilityScope
+                            )
+                        }
+                    } else imageModifier,
+                    contentScale = ContentScale.Crop
+                )
+                
+                if (isSelected) {
+                    Surface(
+                        modifier = Modifier
+                            .size(Dims.ArtworkSmall)
+                            .clip(RoundedCornerShape(Dims.SmallRadius)),
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Check,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onPrimary,
+                            modifier = Modifier.padding(12.dp)
                         )
                     }
-                } else imageModifier,
-                contentScale = ContentScale.Crop
-            )
-            
-            if (isSelected) {
-                Surface(
-                    modifier = Modifier
-                        .size(Dims.ArtworkSmall)
-                        .clip(RoundedCornerShape(Dims.SmallRadius)),
-                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Check,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onPrimary,
-                        modifier = Modifier.padding(12.dp)
-                    )
                 }
             }
-        }
 
-        Spacer(modifier = Modifier.width(Dims.ElementPadding))
+            Spacer(modifier = Modifier.width(Dims.ElementPadding))
 
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = song.title,
-                style = MaterialTheme.typography.titleMedium,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            Text(
-                text = "${song.artist} • ${song.album}",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-        }
-        
-        if (song.isFavorite) {
-            Icon(
-                imageVector = Icons.Default.Favorite,
-                contentDescription = null,
-                tint = FavoriteRed,
-                modifier = Modifier.size(16.dp).padding(horizontal = 4.dp)
-            )
-        }
-
-        Box {
-            IconButton(onClick = { showMenu = true }) {
-                Icon(
-                    imageVector = Icons.Default.MoreVert,
-                    contentDescription = "More",
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = song.title,
+                    style = MaterialTheme.typography.titleMedium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = "${song.artist} • ${song.album}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f) else MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
-            DropdownMenu(
-                expanded = showMenu,
-                onDismissRequest = { showMenu = false }
-            ) {
-                DropdownMenuItem(
-                    text = { Text("Add to Playlist") },
-                    onClick = {
-                        onAddToPlaylist()
-                        showMenu = false
-                    }
+            
+            if (song.isFavorite) {
+                Icon(
+                    imageVector = Icons.Default.Favorite,
+                    contentDescription = null,
+                    tint = FavoriteRed,
+                    modifier = Modifier.size(16.dp).padding(horizontal = 4.dp)
                 )
-                DropdownMenuItem(
-                    text = { Text("Play Next") },
-                    onClick = {
-                        onPlayNext()
-                        showMenu = false
-                    }
-                )
-                DropdownMenuItem(
-                    text = { Text("Add to Queue") },
-                    onClick = {
-                        onAddToQueue()
-                        showMenu = false
-                    }
-                )
-                DropdownMenuItem(
-                    text = { Text("Edit Info") },
-                    onClick = {
-                        onEditInfo()
-                        showMenu = false
-                    }
-                )
+            }
+
+            Box {
+                IconButton(onClick = { showMenu = true }) {
+                    Icon(
+                        imageVector = Icons.Default.MoreVert,
+                        contentDescription = "More",
+                        tint = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                DropdownMenu(
+                    expanded = showMenu,
+                    onDismissRequest = { showMenu = false }
+                ) {
+                    DropdownMenuItem(
+                        text = { Text("Add to Playlist") },
+                        onClick = {
+                            onAddToPlaylist()
+                            showMenu = false
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Play Next") },
+                        onClick = {
+                            onPlayNext()
+                            showMenu = false
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Add to Queue") },
+                        onClick = {
+                            onAddToQueue()
+                            showMenu = false
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Edit Info") },
+                        onClick = {
+                            onEditInfo()
+                            showMenu = false
+                        }
+                    )
+                }
             }
         }
     }
