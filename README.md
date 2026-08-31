@@ -8,7 +8,9 @@ Echo is built from the ground up using Jetpack Compose and modern Android archit
 
 ## Features
 
-### Core Playback
+### Current Release (v1.0.1)
+
+#### Core Playback
 *   **High-Fidelity Audio**: Powered by Jetpack Media3 (ExoPlayer) for reliable background playback.
 *   **Seamless Transitions**: Support for **True Gapless Playback** and customizable **Cross-fade** duration.
 *   **Media Session Integration**: Full support for system-level controls, Bluetooth peripherals, and Android Auto.
@@ -75,6 +77,22 @@ For more detailed instructions, see the [Build & Installation guide](docs/build.
 *   **Performance**: Baseline Profiles (androidx.profileinstaller)
 *   **Widget**: Jetpack Glance
 *   **Image Loading**: Coil
+
+## Roadmap
+
+### Next Release
+
+- [ ] **Advanced Audio Effects**: Addition of Bass Boost, Virtualizer, and Reverb presets.
+- [ ] **Online Metadata Retrieval**: Automatic fetching of missing album art and song information from open-source databases.
+- [ ] **Visual Refinements**: Expanded use of shared element transitions and motion layout for a more fluid experience.
+- [ ] **Widget Expansion**: Additional home screen widget styles and sizes for better customization.
+- [ ] **Extended Testing**: Implementation of comprehensive UI and end-to-end testing suites.
+
+### Future
+
+- [ ] **Cast Support**: Integration with Google Cast and other remote playback protocols.
+- [ ] **Advanced Library Management**: Smart playlists based on listening patterns and multi-folder hierarchy support.
+- [ ] **Performance Scaling**: Optimizations for libraries exceeding 10,000+ tracks.
 
 ## Contributing
 

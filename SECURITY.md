@@ -2,13 +2,13 @@
 
 ## Supported Versions
 
-Only the latest stable release and the current development version are supported for security updates.
+The following versions of Echo are currently supported for security updates:
 
 | Version | Supported |
 | :--- | :--- |
 | Next development version | Yes |
-| 1.0.x | Yes |
-| < 1.0.0 | No |
+| v1.0.x | Yes |
+| < v1.0.0 | No |
 
 ## Reporting a Vulnerability
 
