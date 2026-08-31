@@ -2,13 +2,13 @@ package com.acevflow.echo.media
 
 import android.content.ComponentName
 import android.content.Context
+import androidx.core.content.ContextCompat
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
 import com.acevflow.echo.data.preferences.UserPreferencesRepository
 import com.google.common.util.concurrent.ListenableFuture
-import com.google.common.util.concurrent.MoreExecutors
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -162,7 +162,7 @@ class MediaControllerManager @Inject constructor(
             if (controller?.isPlaying == true) {
                 startProgressUpdate()
             }
-        }, MoreExecutors.directExecutor())
+        }, ContextCompat.getMainExecutor(context))
     }
 
     private fun startProgressUpdate() {
@@ -172,7 +172,7 @@ class MediaControllerManager @Inject constructor(
                 _controller.value?.let {
                     _playbackPosition.value = it.currentPosition
                 }
-                delay(1000)
+                delay(500)
             }
         }
     }
@@ -289,14 +289,15 @@ class MediaControllerManager @Inject constructor(
     fun startSleepTimer(minutes: Int) {
         sleepTimerJob?.cancel()
         val totalMillis = minutes * 60 * 1000L
+        val endTime = android.os.SystemClock.elapsedRealtime() + totalMillis
         _sleepTimerMillisLeft.value = totalMillis
 
         sleepTimerJob = scope.launch {
-            var remaining = totalMillis
-            while (remaining > 0) {
-                delay(1000)
-                remaining -= 1000
+            while (isActive) {
+                val remaining = endTime - android.os.SystemClock.elapsedRealtime()
+                if (remaining <= 0) break
                 _sleepTimerMillisLeft.value = remaining
+                delay(1000)
             }
             pause()
             _sleepTimerMillisLeft.value = null

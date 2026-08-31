@@ -215,15 +215,20 @@ fun PlayerScreen(
             Spacer(modifier = Modifier.height(Dims.ScreenPadding))
 
             // Progress Slider
+            var isDragging by remember { mutableStateOf(false) }
             var sliderPosition by remember(playbackPosition) {
                 mutableFloatStateOf(playbackPosition.toFloat())
             }
 
             Column(modifier = Modifier.fillMaxWidth().padding(horizontal = Dims.SmallPadding)) {
                 Slider(
-                    value = sliderPosition,
-                    onValueChange = { sliderPosition = it },
+                    value = if (isDragging) sliderPosition else playbackPosition.toFloat(),
+                    onValueChange = { 
+                        isDragging = true
+                        sliderPosition = it 
+                    },
                     onValueChangeFinished = {
+                        isDragging = false
                         viewModel.seekTo(sliderPosition.toLong())
                     },
                     valueRange = 0f..duration.toFloat().coerceAtLeast(1f),

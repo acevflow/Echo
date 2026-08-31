@@ -15,7 +15,6 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -73,7 +72,6 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        // ... rest of onCreate ...
         setContent {
             val windowSizeClass = calculateWindowSizeClass(this)
             val useNavigationRail = windowSizeClass.widthSizeClass != WindowWidthSizeClass.Compact
@@ -97,7 +95,7 @@ class MainActivity : ComponentActivity() {
 
             EchoTheme(
                 darkTheme = darkTheme,
-                dynamicColor = dynamicColorEnabled
+                dynamicColor = dynamicColorEnabled,
             ) {
                 SharedTransitionLayout {
                     CompositionLocalProvider(LocalSharedTransitionScope provides this) {
@@ -148,10 +146,10 @@ class MainActivity : ComponentActivity() {
                             bottomBar = {
                                 if (!useNavigationRail) {
                                     Column {
-                                        AnimatedVisibility(
-                                            visible = currentMediaItem != null && 
+                                        androidx.compose.animation.AnimatedVisibility(
+                                            visible = (currentMediaItem != null && 
                                                     currentDestination?.route != Screen.Player.route && 
-                                                    currentDestination?.route != Screen.Search.route,
+                                                    currentDestination?.route != Screen.Search.route),
                                             enter = fadeIn() + expandVertically(),
                                             exit = fadeOut() + shrinkVertically()
                                         ) {
@@ -244,9 +242,9 @@ class MainActivity : ComponentActivity() {
                                                 .padding(Dims.ScreenPadding)
                                         ) {
                                             androidx.compose.animation.AnimatedVisibility(
-                                                visible = currentMediaItem != null && 
+                                                visible = (currentMediaItem != null && 
                                                         currentDestination?.route != Screen.Player.route && 
-                                                        currentDestination?.route != Screen.Search.route,
+                                                        currentDestination?.route != Screen.Search.route),
                                                 enter = fadeIn(),
                                                 exit = fadeOut()
                                             ) {
@@ -271,14 +269,19 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun handleIntent(intent: android.content.Intent, viewModel: MainViewModel, navController: androidx.navigation.NavHostController) {
-        when (intent.getStringExtra("shortcut")) {
-            "search" -> navController.navigate(Screen.Search.route)
-            "shuffle_all" -> viewModel.shuffleAll()
+        val shortcut = intent.getStringExtra("shortcut")
+        if (shortcut != null) {
+            when (shortcut) {
+                "search" -> navController.navigate(Screen.Search.route)
+                "shuffle_all" -> viewModel.shuffleAll()
+            }
+            intent.removeExtra("shortcut")
         }
         
         val playlistId = intent.getLongExtra("playlist_id", -1L)
         if (playlistId != -1L) {
             viewModel.playPlaylist(playlistId)
+            intent.removeExtra("playlist_id")
         }
     }
 

@@ -5,6 +5,7 @@ import android.content.ContentValues
 import android.content.Context
 import android.os.Build
 import android.provider.MediaStore
+import android.util.Log
 import androidx.core.net.toUri
 import com.acevflow.echo.data.local.dao.FavoriteSongDao
 import com.acevflow.echo.data.local.dao.PlaybackHistoryDao
@@ -38,6 +39,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Implementation of [MusicRepository] that uses the Android MediaStore API to discover local music.
@@ -56,10 +58,10 @@ class MediaStoreMusicRepository @Inject constructor(
     @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
     override fun getSongs(): Flow<List<Song>> = context.contentResolver
         .observe(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI)
-        .debounce(300) // Prevent rapid UI flickers during batch operations
+        .debounce(300.milliseconds)
         .flatMapLatest {
             combine(
-                getMediaStoreSongs(null),
+                flow { emit(queryMediaStoreSongs(null)) },
                 favoriteSongDao.getAllFavorites(),
                 artworkOverrideDao.getAllOverrides(),
                 preferencesRepository.excludedFolders
@@ -71,23 +73,28 @@ class MediaStoreMusicRepository @Inject constructor(
             }
         }.flowOn(Dispatchers.IO)
 
-    override fun getSongById(songId: Long): Flow<Song?> = combine(
-        getMediaStoreSongs("${MediaStore.Audio.Media._ID} = ?", arrayOf(songId.toString())),
-        favoriteSongDao.isFavorite(songId),
-        artworkOverrideDao.getAllOverrides()
-    ) { songs, isFavorite, overrides ->
-        val song = songs.firstOrNull() ?: return@combine null
-        val overrideMap = overrides.associate { it.songId to it.artworkUri.toUri() }
-        song.copy(
-            isFavorite = isFavorite,
-            artworkUri = overrideMap[songId] ?: song.artworkUri
-        )
-    }.flowOn(Dispatchers.IO)
+    override fun getSongById(songId: Long): Flow<Song?> = context.contentResolver
+        .observe(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI)
+        .debounce(300.milliseconds)
+        .flatMapLatest {
+            combine(
+                flow { emit(queryMediaStoreSongs("${MediaStore.Audio.Media._ID} = ?", arrayOf(songId.toString()))) },
+                favoriteSongDao.isFavorite(songId),
+                artworkOverrideDao.getAllOverrides()
+            ) { songs, isFavorite, overrides ->
+                val song = songs.firstOrNull() ?: return@combine null
+                val overrideMap = overrides.associateBy({ it.songId }) { it.artworkUri.toUri() }
+                song.copy(
+                    isFavorite = isFavorite,
+                    artworkUri = overrideMap[songId] ?: song.artworkUri
+                )
+            }
+        }.flowOn(Dispatchers.IO)
 
     @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
     override fun getAlbums(): Flow<List<Album>> = context.contentResolver
         .observe(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI)
-        .debounce(300)
+        .debounce(300.milliseconds)
         .flatMapLatest {
             flow {
                 val albums = mutableListOf<Album>()
@@ -127,66 +134,78 @@ class MediaStoreMusicRepository @Inject constructor(
             }
         }.flowOn(Dispatchers.IO)
 
-    override fun getArtists(): Flow<List<Artist>> = flow {
-        val artists = mutableListOf<Artist>()
-        val collection = MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI
-        val projection = arrayOf(
-            MediaStore.Audio.Artists._ID,
-            MediaStore.Audio.Artists.ARTIST,
-            MediaStore.Audio.Artists.NUMBER_OF_TRACKS,
-            MediaStore.Audio.Artists.NUMBER_OF_ALBUMS
-        )
-        val sortOrder = "${MediaStore.Audio.Artists.ARTIST} ASC"
-
-        context.contentResolver.query(collection, projection, null, null, sortOrder)?.use { cursor ->
-            val idCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Artists._ID)
-            val artistCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Artists.ARTIST)
-            val numTracksCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Artists.NUMBER_OF_TRACKS)
-            val numAlbumsCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Artists.NUMBER_OF_ALBUMS)
-
-            while (cursor.moveToNext()) {
-                artists.add(
-                    Artist(
-                        id = cursor.getLong(idCol),
-                        name = cursor.getString(artistCol),
-                        trackCount = cursor.getInt(numTracksCol),
-                        albumCount = cursor.getInt(numAlbumsCol)
-                    )
+    @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
+    override fun getArtists(): Flow<List<Artist>> = context.contentResolver
+        .observe(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI)
+        .debounce(300.milliseconds)
+        .flatMapLatest {
+            flow {
+                val artists = mutableListOf<Artist>()
+                val collection = MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI
+                val projection = arrayOf(
+                    MediaStore.Audio.Artists._ID,
+                    MediaStore.Audio.Artists.ARTIST,
+                    MediaStore.Audio.Artists.NUMBER_OF_TRACKS,
+                    MediaStore.Audio.Artists.NUMBER_OF_ALBUMS
                 )
-            }
-        }
-        emit(artists)
-    }.flowOn(Dispatchers.IO)
+                val sortOrder = "${MediaStore.Audio.Artists.ARTIST} ASC"
 
-    override fun getGenres(): Flow<List<Genre>> = flow {
-        val genres = mutableListOf<Genre>()
-        val collection = MediaStore.Audio.Genres.EXTERNAL_CONTENT_URI
-        val projection = arrayOf(
-            MediaStore.Audio.Genres._ID,
-            MediaStore.Audio.Genres.NAME
-        )
+                context.contentResolver.query(collection, projection, null, null, sortOrder)?.use { cursor ->
+                    val idCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Artists._ID)
+                    val artistCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Artists.ARTIST)
+                    val numTracksCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Artists.NUMBER_OF_TRACKS)
+                    val numAlbumsCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Artists.NUMBER_OF_ALBUMS)
 
-        context.contentResolver.query(collection, projection, null, null, null)?.use { cursor ->
-            val idCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Genres._ID)
-            val nameCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Genres.NAME)
-
-            while (cursor.moveToNext()) {
-                val id = cursor.getLong(idCol)
-                val name = cursor.getString(nameCol) ?: "Unknown"
-                
-                // Get track count for this genre
-                val uri = MediaStore.Audio.Genres.Members.getContentUri("external", id)
-                val countCursor = context.contentResolver.query(uri, arrayOf(MediaStore.Audio.Media._ID), null, null, null)
-                val trackCount = countCursor?.count ?: 0
-                countCursor?.close()
-
-                if (trackCount > 0) {
-                    genres.add(Genre(id, name, trackCount))
+                    while (cursor.moveToNext()) {
+                        artists.add(
+                            Artist(
+                                id = cursor.getLong(idCol),
+                                name = cursor.getString(artistCol),
+                                trackCount = cursor.getInt(numTracksCol),
+                                albumCount = cursor.getInt(numAlbumsCol)
+                            )
+                        )
+                    }
                 }
+                emit(artists)
             }
-        }
-        emit(genres.sortedBy { it.name })
-    }.flowOn(Dispatchers.IO)
+        }.flowOn(Dispatchers.IO)
+
+    @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
+    override fun getGenres(): Flow<List<Genre>> = context.contentResolver
+        .observe(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI)
+        .debounce(300.milliseconds)
+        .flatMapLatest {
+            flow {
+                val genres = mutableListOf<Genre>()
+                val collection = MediaStore.Audio.Genres.EXTERNAL_CONTENT_URI
+                val projection = arrayOf(
+                    MediaStore.Audio.Genres._ID,
+                    MediaStore.Audio.Genres.NAME
+                )
+
+                context.contentResolver.query(collection, projection, null, null, null)?.use { cursor ->
+                    val idCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Genres._ID)
+                    val nameCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Genres.NAME)
+
+                    while (cursor.moveToNext()) {
+                        val id = cursor.getLong(idCol)
+                        val name = cursor.getString(nameCol) ?: "Unknown"
+                        
+                        // Get track count for this genre
+                        val uri = MediaStore.Audio.Genres.Members.getContentUri("external", id)
+                        val countCursor = context.contentResolver.query(uri, arrayOf(MediaStore.Audio.Media._ID), null, null, null)
+                        val trackCount = countCursor?.count ?: 0
+                        countCursor?.close()
+
+                        if (trackCount > 0) {
+                            genres.add(Genre(id, name, trackCount))
+                        }
+                    }
+                }
+                emit(genres.sortedBy { it.name })
+            }
+        }.flowOn(Dispatchers.IO)
 
     override fun getFolders(): Flow<List<Folder>> = combine(
         flow {
@@ -207,7 +226,7 @@ class MediaStoreMusicRepository @Inject constructor(
         },
         preferencesRepository.excludedFolders
     ) { foldersMap, excluded ->
-        foldersMap.filter { (path, _) ->
+        foldersMap.asSequence().filter { (path, _) ->
             excluded.none { excludedPath -> path.startsWith(excludedPath) }
         }.map { (path, count) ->
             Folder(
@@ -215,7 +234,7 @@ class MediaStoreMusicRepository @Inject constructor(
                 path = path,
                 trackCount = count
             )
-        }.sortedBy { it.name }
+        }.sortedBy { it.name }.toList()
     }.flowOn(Dispatchers.IO)
 
     override fun getSongsByAlbum(albumId: Long): Flow<List<Song>> = combine(
@@ -328,7 +347,7 @@ class MediaStoreMusicRepository @Inject constructor(
                 try {
                     context.contentResolver.update(uri, values, null, null)
                 } catch (e: Exception) {
-                    e.printStackTrace()
+                    Log.e("MediaStoreMusicRepo", "Error performing batch update", e)
                 }
             }
         }
@@ -354,24 +373,22 @@ class MediaStoreMusicRepository @Inject constructor(
         overrides: List<ArtworkOverride>
     ): List<Song> {
         val favoriteIds = favorites.map { it.songId }.toSet()
-        val overrideMap = overrides.associate { it.songId to it.artworkUri.toUri() }
+        val overrideMap = overrides.associateBy { it.songId }
         return songs.map { song ->
             song.copy(
                 isFavorite = favoriteIds.contains(song.id),
-                artworkUri = overrideMap[song.id] ?: song.artworkUri
+                artworkUri = overrideMap[song.id]?.artworkUri?.toUri() ?: song.artworkUri
             )
         }
     }
 
-    private fun getMediaStoreSongs(
+    private fun queryMediaStoreSongs(
         selection: String?,
         selectionArgs: Array<String>? = null,
         customSortOrder: String? = null
-    ): Flow<List<Song>> = flow {
+    ): List<Song> {
         val songs = mutableListOf<Song>()
-        
         val collection = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
-        
         val projection = arrayOf(
             MediaStore.Audio.Media._ID,
             MediaStore.Audio.Media.TITLE,
@@ -389,13 +406,7 @@ class MediaStoreMusicRepository @Inject constructor(
         }
         val sortOrder = customSortOrder ?: "${MediaStore.Audio.Media.TITLE} ASC"
         
-        context.contentResolver.query(
-            collection,
-            projection,
-            finalSelection,
-            selectionArgs,
-            sortOrder
-        )?.use { cursor ->
+        context.contentResolver.query(collection, projection, finalSelection, selectionArgs, sortOrder)?.use { cursor ->
             val idColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID)
             val titleColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE)
             val artistColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST)
@@ -413,23 +424,24 @@ class MediaStoreMusicRepository @Inject constructor(
                 val albumId = cursor.getLong(albumIdColumn)
                 val data = cursor.getString(dataColumn)
                 
-                val contentUri = ContentUris.withAppendedId(
-                    MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                    id
-                )
-                
-                val artworkUri = ContentUris.withAppendedId(
-                    "content://media/external/audio/albumart".toUri(),
-                    albumId
-                )
-                
+                val contentUri = ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, id)
+                val artworkUri = ContentUris.withAppendedId("content://media/external/audio/albumart".toUri(), albumId)
                 val parentPath = data?.substringBeforeLast('/')
                 
                 songs.add(Song(id, title, artist, album, duration, contentUri, artworkUri, false, parentPath))
             }
         }
-        emit(songs)
+        return songs
     }
+
+    private fun getMediaStoreSongs(
+        selection: String?,
+        selectionArgs: Array<String>? = null,
+        customSortOrder: String? = null
+    ): Flow<List<Song>> = context.contentResolver
+        .observe(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI)
+        .debounce(300.milliseconds)
+        .map { queryMediaStoreSongs(selection, selectionArgs, customSortOrder) }
 
     override fun getSongsByFolder(folderPath: String): Flow<List<Song>> = combine(
         getMediaStoreSongs("${MediaStore.Audio.Media.DATA} LIKE ?", arrayOf("$folderPath/%")),
@@ -462,8 +474,6 @@ class MediaStoreMusicRepository @Inject constructor(
 
         // 1. Try to find .lrc file in the same folder
         val songFile = song.parentPath?.let { path ->
-            val fileName = song.contentUri.toString().substringAfterLast('/')
-            // We need the actual filename or a way to match it.
             // MediaStore DATA column gives the full path.
             // For now, let's try title.lrc as a common convention.
             java.io.File(path, "${song.title}.lrc")
@@ -516,7 +526,19 @@ class MediaStoreMusicRepository @Inject constructor(
                     albumId
                 )
                 val parentPath = data?.substringBeforeLast('/')
-                songs.add(Song(id, title, artist, album, duration, contentUri, artworkUri, false, parentPath))
+                songs.add(
+                    Song(
+                        id = id,
+                        title = title,
+                        artist = artist,
+                        album = album,
+                        duration = duration,
+                        contentUri = contentUri,
+                        artworkUri = artworkUri,
+                        isFavorite = false,
+                        parentPath = parentPath
+                    )
+                )
             }
         }
         emit(songs)

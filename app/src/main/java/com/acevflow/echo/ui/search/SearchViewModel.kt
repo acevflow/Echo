@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -31,8 +32,9 @@ class SearchViewModel @Inject constructor(
     val searchHistory = musicRepository.getRecentSearchHistory()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
+    @OptIn(kotlinx.coroutines.FlowPreview::class)
     val searchResults: StateFlow<SearchResults> = combine(
-        _query,
+        _query.debounce(300),
         musicRepository.getSongs(),
         musicRepository.getAlbums(),
         musicRepository.getArtists()
@@ -53,12 +55,6 @@ class SearchViewModel @Inject constructor(
             if (filteredSongs.isEmpty() && filteredAlbums.isEmpty() && filteredArtists.isEmpty()) {
                 SearchResults.NoResults
             } else {
-                // If we have successful results, consider adding to history
-                if (filteredSongs.isNotEmpty() || filteredAlbums.isNotEmpty() || filteredArtists.isNotEmpty()) {
-                    viewModelScope.launch {
-                        musicRepository.addSearchQuery(query)
-                    }
-                }
                 SearchResults.Success(filteredSongs, filteredAlbums, filteredArtists)
             }
         }
@@ -81,6 +77,9 @@ class SearchViewModel @Inject constructor(
     }
 
     fun playSong(song: Song) {
+        viewModelScope.launch {
+            musicRepository.addSearchQuery(_query.value)
+        }
         val mediaItem = MediaItem.Builder()
             .setMediaId(song.id.toString())
             .setUri(song.contentUri)

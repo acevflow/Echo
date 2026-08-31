@@ -6,7 +6,7 @@ A modern, high-performance local music player for Android. Echo provides a clean
 
 Echo is built from the ground up using Jetpack Compose and modern Android architecture. It aims to be a focused alternative to bloated media players, offering robust library management and professional audio customization without unnecessary tracking or cloud dependencies.
 
-## Features (v1.0.0)
+## Features
 
 ### Core Playback
 *   **High-Fidelity Audio**: Powered by Jetpack Media3 (ExoPlayer) for reliable background playback.
@@ -25,6 +25,7 @@ Echo is built from the ground up using Jetpack Compose and modern Android archit
 *   **Listening History**: Automatic tracking of your recently played tracks with manual management.
 *   **Library Control**: Take command of your collection by excluding specific folders (e.g., voice notes, notifications) from being scanned.
 *   **Metadata Editor**: In-app support for editing song information (Title, Artist, Album) and personalizing **Album Artwork**; includes **Batch Editing** for multiple tracks.
+*   **Synchronized Lyrics**: Support for both embedded and external `.lrc` sidecar files with reactive, auto-scrolling display.
 
 ### Advanced Customization
 *   **Adaptive UI**: Responsive layouts optimized for **Phones**, **Tablets**, and **Foldables** using Window Size Classes.
@@ -32,7 +33,6 @@ Echo is built from the ground up using Jetpack Compose and modern Android archit
 *   **Interactive Queue**: Manage upcoming tracks via a dedicated Bottom Sheet with **drag-and-drop reordering**.
 *   **Professional Audio**: Built-in **5-band Equalizer** with frequency adjustment, **Presets**, and persistent audio profiles; includes **Volume Normalization** (DynamicsProcessing) for a balanced acoustic experience.
 *   **Automation**: Integrated **Sleep Timer** with customizable intervals to automatically stop playback.
-*   **Synchronized Lyrics**: Support for both embedded and external `.lrc` sidecar files with reactive, auto-scrolling display.
 *   **Dynamic UI**: Full support for **Light/Dark/System** modes and **Material You Dynamic Color** (Android 12+).
 *   **Ambient Presence**: Quick access via **Static and Dynamic Launcher Shortcuts** for Search, Shuffle All, and your most-played playlists.
 *   **Home Screen Widget**: Control your music instantly using a modern Jetpack Glance widget.
@@ -54,14 +54,10 @@ Echo is built from the ground up using Jetpack Compose and modern Android archit
 ## Getting Started
 
 1.  **Clone the repository**: `git clone https://github.com/acevflow/Echo.git`
-2.  **Open in Android Studio**: Selection the root folder.
+2.  **Open in Android Studio**: Select the root folder.
 3.  **Build & Run**: Use the `app` configuration.
 
 For more detailed instructions, see the [Build & Installation guide](docs/build.md).
-
-## Development
-
-Echo is developed with a strict adherence to **Clean Architecture** principles, ensuring the codebase remains modular, testable, and maintainable. The project includes a robust **Unit Testing** suite using MockK and Turbine to guarantee the integrity of reactive data streams.
 
 ## Documentation
 
@@ -79,17 +75,6 @@ Echo is developed with a strict adherence to **Clean Architecture** principles, 
 *   **Performance**: Baseline Profiles (androidx.profileinstaller)
 *   **Widget**: Jetpack Glance
 *   **Image Loading**: Coil
-
-## Roadmap
-
-### Next Release
-- [ ] **Performance Profiling**: Comprehensive benchmarking using Macrobenchmark and Baseline Profile optimization.
-- [ ] **Visual Polish**: Animated artwork effects and custom transition curves.
-- [ ] **Enhanced Discovery**: Personal year-in-review and advanced library statistics.
-
-### Future
-- [ ] **Cloud Sync**: Optional, privacy-focused synchronization of playlists and favorites.
-- [ ] **Wear OS Support**: Companion app for music control from your wrist.
 
 ## Contributing
 

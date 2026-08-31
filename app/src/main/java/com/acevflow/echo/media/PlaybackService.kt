@@ -4,12 +4,12 @@ import android.content.Intent
 import android.media.audiofx.DynamicsProcessing
 import android.media.audiofx.Equalizer
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
-import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.session.MediaSession
@@ -48,8 +48,11 @@ class PlaybackService : MediaSessionService() {
     private val serviceScope = CoroutineScope(Dispatchers.Main + Job())
     private lateinit var volumeController: VolumeController
     private var crossfadeJob: Job? = null
+    private var equalizerJob: Job? = null
+    private var dynamicsJob: Job? = null
 
-    private val playerListener = object : Player.Listener {
+    private val playerListener = @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
+    object : Player.Listener {
         override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
             mediaItem?.mediaId?.toLongOrNull()?.let { songId ->
                 serviceScope.launch {
@@ -60,6 +63,13 @@ class PlaybackService : MediaSessionService() {
             // Start fading in on every new item
             mediaSession?.player?.let {
                 volumeController.fadeIn(it, 500)
+            }
+        }
+
+        override fun onAudioSessionIdChanged(audioSessionId: Int) {
+            applyEqualizer(audioSessionId)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                applyDynamicsProcessing(audioSessionId)
             }
         }
     }
@@ -102,19 +112,22 @@ class PlaybackService : MediaSessionService() {
         crossfadeJob?.cancel()
         crossfadeJob = serviceScope.launch {
             while (isActive) {
-                delay(500.milliseconds)
-                val duration = player.duration
-                val position = player.currentPosition
-                val crossfadeSeconds = preferencesRepository.crossfadeDuration.first()
-                
-                if (crossfadeSeconds > 0 && duration > 0 && (duration - position) <= (crossfadeSeconds * 1000L)) {
-                    if (player.hasNextMediaItem()) {
-                        volumeController.fadeOutAndPause(player, (crossfadeSeconds * 1000L))
-                        delay(crossfadeSeconds.toLong() * 1000L)
-                        player.seekToNext()
-                        player.play()
+                if (player.isPlaying) {
+                    val duration = player.duration
+                    val position = player.currentPosition
+                    val crossfadeSeconds = preferencesRepository.crossfadeDuration.first()
+                    
+                    if (crossfadeSeconds > 0 && duration > 0 && (duration - position) <= (crossfadeSeconds * 1000L)) {
+                        if (player.hasNextMediaItem()) {
+                            volumeController.fadeOutAndPause(player, (crossfadeSeconds * 1000L))
+                            // Wait for fade out to complete before skipping
+                            delay(crossfadeSeconds.toLong() * 1000L)
+                            player.seekToNext()
+                            player.play()
+                        }
                     }
                 }
+                delay(500.milliseconds)
             }
         }
     }
@@ -122,26 +135,29 @@ class PlaybackService : MediaSessionService() {
     private fun applyEqualizer(audioSessionId: Int) {
         if (audioSessionId == -1) return
         
+        equalizerJob?.cancel()
         equalizer?.release()
         try {
-            equalizer = Equalizer(0, audioSessionId).apply {
-                serviceScope.launch {
+            val newEqualizer = Equalizer(0, audioSessionId)
+            equalizer = newEqualizer
+            equalizerJob = serviceScope.launch {
+                launch {
                     preferencesRepository.equalizerEnabled.collect { isEnabled ->
-                        enabled = isEnabled
+                        newEqualizer.enabled = isEnabled
                     }
                 }
-                serviceScope.launch {
+                launch {
                     preferencesRepository.equalizerBands.collect { bands ->
                         bands.forEach { (band, gain) ->
-                            if (band < numberOfBands) {
-                                setBandLevel(band.toShort(), gain.toShort())
+                            if (band < newEqualizer.numberOfBands) {
+                                newEqualizer.setBandLevel(band.toShort(), gain.toShort())
                             }
                         }
                     }
                 }
             }
         } catch (e: Exception) {
-            e.printStackTrace()
+            Log.e("PlaybackService", "Error applying equalizer", e)
         }
     }
 
@@ -149,6 +165,7 @@ class PlaybackService : MediaSessionService() {
     private fun applyDynamicsProcessing(audioSessionId: Int) {
         if (audioSessionId == -1 || Build.VERSION.SDK_INT < Build.VERSION_CODES.P) return
 
+        dynamicsJob?.cancel()
         dynamicsProcessing?.release()
         try {
             // A simple Limiter/Loudness configuration for normalization
@@ -164,15 +181,15 @@ class PlaybackService : MediaSessionService() {
                 true // limiter
             ).build()
 
-            dynamicsProcessing = DynamicsProcessing(0, audioSessionId, config).apply {
-                serviceScope.launch {
-                    preferencesRepository.normalizationEnabled.collect { isEnabled ->
-                        enabled = isEnabled
-                    }
+            val newDynamics = DynamicsProcessing(0, audioSessionId, config)
+            dynamicsProcessing = newDynamics
+            dynamicsJob = serviceScope.launch {
+                preferencesRepository.normalizationEnabled.collect { isEnabled ->
+                    newDynamics.enabled = isEnabled
                 }
             }
         } catch (e: Exception) {
-            e.printStackTrace()
+            Log.e("PlaybackService", "Error applying DynamicsProcessing", e)
         }
     }
 
