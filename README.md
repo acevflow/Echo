@@ -22,6 +22,7 @@ Echo is built from the ground up using Jetpack Compose and modern Android archit
 *   **Search Intelligence**: Persistent **Search History** with interactive suggestions and one-tap filtering.
 *   **User Collections**: Create and manage custom **Playlists** and keep track of your **Favorites**.
 *   **Listening History**: Automatic tracking of your recently played tracks with manual management.
+*   **Library Control**: Take command of your collection by excluding specific folders (e.g., voice notes, notifications) from being scanned.
 *   **Metadata Editor**: In-app support for editing song information (Title, Artist, Album) and personalizing **Album Artwork**; includes **Batch Editing** for multiple tracks.
 
 ### Advanced Customization
@@ -30,6 +31,7 @@ Echo is built from the ground up using Jetpack Compose and modern Android archit
 *   **Interactive Queue**: Manage upcoming tracks via a dedicated Bottom Sheet with **drag-and-drop reordering**.
 *   **Professional Audio**: Built-in **5-band Equalizer** with frequency adjustment and persistent audio profiles.
 *   **Automation**: Integrated **Sleep Timer** with customizable intervals to automatically stop playback.
+*   **Synchronized Lyrics**: Support for both embedded and external `.lrc` sidecar files with reactive, auto-scrolling display.
 *   **Dynamic UI**: Full support for **Light/Dark/System** modes and **Material You Dynamic Color** (Android 12+).
 *   **Home Screen Widget**: Control your music instantly using a modern Jetpack Glance widget.
 
@@ -75,15 +77,12 @@ For more detailed instructions, see the [Build & Installation guide](docs/build.
 ## Roadmap
 
 ### Next Release
-- [ ] **Visual Polish**: Animated artwork effects and custom transitions.
-- [ ] **Audio Refinement**: Enhanced equalizer presets and volume normalization.
+- [ ] **Audio Refinement**: Enhanced equalizer presets and volume normalization (DynamicsProcessing).
+- [ ] **Visual Polish**: Animated artwork effects and custom transition curves.
 
 ### Future
-- [ ] **Enhanced Widgets**: Multiple widget sizes and customizable shortcut actions.
-
-### Future
-- [ ] **Wear OS Support**: Companion app for music control from your wrist.
 - [ ] **Cloud Sync**: Optional, privacy-focused synchronization of playlists and favorites.
+- [ ] **Wear OS Support**: Companion app for music control from your wrist.
 
 ## Contributing
 

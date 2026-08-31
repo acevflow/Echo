@@ -23,6 +23,7 @@ class UserPreferencesRepository @Inject constructor(
         val EQUALIZER_ENABLED = booleanPreferencesKey("equalizer_enabled")
         val EQUALIZER_BANDS = stringPreferencesKey("equalizer_bands") // Format: "band0:gain0,band1:gain1..."
         val CROSSFADE_DURATION = intPreferencesKey("crossfade_duration") // In seconds
+        val EXCLUDED_FOLDERS = stringPreferencesKey("excluded_folders") // Comma-separated paths
     }
 
     val shuffleModeEnabled: Flow<Boolean> = dataStore.data.map { preferences ->
@@ -58,6 +59,12 @@ class UserPreferencesRepository @Inject constructor(
 
     val crossfadeDuration: Flow<Int> = dataStore.data.map { preferences ->
         preferences[PreferencesKeys.CROSSFADE_DURATION] ?: 0 // Default 0 (disabled)
+    }
+
+    val excludedFolders: Flow<Set<String>> = dataStore.data.map { preferences ->
+        val foldersStr = preferences[PreferencesKeys.EXCLUDED_FOLDERS] ?: ""
+        if (foldersStr.isEmpty()) emptySet()
+        else foldersStr.split(",").toSet()
     }
 
     suspend fun setShuffleModeEnabled(enabled: Boolean) {
@@ -107,6 +114,21 @@ class UserPreferencesRepository @Inject constructor(
     suspend fun setCrossfadeDuration(duration: Int) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.CROSSFADE_DURATION] = duration
+        }
+    }
+
+    suspend fun toggleFolderExclusion(folderPath: String) {
+        dataStore.edit { preferences ->
+            val currentStr = preferences[PreferencesKeys.EXCLUDED_FOLDERS] ?: ""
+            val currentSet = if (currentStr.isEmpty()) mutableSetOf() else currentStr.split(",").toMutableSet()
+            
+            if (currentSet.contains(folderPath)) {
+                currentSet.remove(folderPath)
+            } else {
+                currentSet.add(folderPath)
+            }
+            
+            preferences[PreferencesKeys.EXCLUDED_FOLDERS] = currentSet.joinToString(",")
         }
     }
 }

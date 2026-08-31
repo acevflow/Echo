@@ -44,6 +44,9 @@ interface MusicRepository {
     /** Returns a flow of songs belonging to a specific genre ID. */
     fun getSongsByGenre(genreId: Long): Flow<List<Song>>
 
+    /** Returns the synchronized lyrics for a song, if available. */
+    fun getLyrics(songId: Long): Flow<String?>
+
     /** Returns a flow of the favorite status for a specific song ID. */
     fun isFavorite(songId: Long): Flow<Boolean>
 

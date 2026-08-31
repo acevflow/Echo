@@ -32,6 +32,16 @@ class PlayerViewModel @Inject constructor(
     val repeatMode = mediaControllerManager.repeatMode
 
     @OptIn(ExperimentalCoroutinesApi::class)
+    val lyrics: StateFlow<String?> = currentMediaItem.flatMapLatest { mediaItem ->
+        val songId = mediaItem?.mediaId?.toLongOrNull()
+        if (songId != null) {
+            musicRepository.getLyrics(songId)
+        } else {
+            flowOf(null)
+        }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
+
+    @OptIn(ExperimentalCoroutinesApi::class)
     val isFavorite: StateFlow<Boolean> = currentMediaItem.flatMapLatest { mediaItem ->
         val songId = mediaItem?.mediaId?.toLongOrNull()
         if (songId != null) {

@@ -32,6 +32,7 @@ import com.acevflow.echo.ui.theme.Dims
 fun SettingsScreen(
     viewModel: SettingsViewModel,
     onNavigateToEqualizer: () -> Unit,
+    onNavigateToExcludedFolders: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val themeMode by viewModel.themeMode.collectAsState(initial = 0)
@@ -89,6 +90,33 @@ fun SettingsScreen(
                     checked = dynamicColorEnabled,
                     onCheckedChange = { viewModel.setDynamicColorEnabled(it) }
                 )
+            }
+
+            Spacer(modifier = Modifier.padding(vertical = Dims.SmallPadding))
+
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable(onClick = onNavigateToExcludedFolders),
+                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                shape = MaterialTheme.shapes.medium
+            ) {
+                Row(
+                    modifier = Modifier.padding(Dims.ElementPadding),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = "Library Control",
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        Text(
+                            text = "Hide specific folders from your music library",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
             }
 
             Spacer(modifier = Modifier.padding(vertical = Dims.SmallPadding))

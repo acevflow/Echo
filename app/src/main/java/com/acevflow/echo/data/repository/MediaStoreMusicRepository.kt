@@ -16,6 +16,7 @@ import com.acevflow.echo.data.local.entity.PlaybackHistory
 import com.acevflow.echo.data.local.entity.PlaylistSongCrossRef
 import com.acevflow.echo.data.local.entity.SearchHistory
 import com.acevflow.echo.data.local.entity.ArtworkOverride
+import com.acevflow.echo.data.preferences.UserPreferencesRepository
 import com.acevflow.echo.domain.model.Album
 import com.acevflow.echo.domain.model.Artist
 import com.acevflow.echo.domain.model.Folder
@@ -45,15 +46,20 @@ class MediaStoreMusicRepository @Inject constructor(
     private val playlistDao: PlaylistDao,
     private val historyDao: PlaybackHistoryDao,
     private val searchHistoryDao: SearchHistoryDao,
-    private val artworkOverrideDao: ArtworkOverrideDao
+    private val artworkOverrideDao: ArtworkOverrideDao,
+    private val preferencesRepository: UserPreferencesRepository
 ) : MusicRepository {
 
     override fun getSongs(): Flow<List<Song>> = combine(
         getMediaStoreSongs(null),
         favoriteSongDao.getAllFavorites(),
-        artworkOverrideDao.getAllOverrides()
-    ) { mediaStoreSongs, favorites, overrides ->
-        applySongDecorations(mediaStoreSongs, favorites, overrides)
+        artworkOverrideDao.getAllOverrides(),
+        preferencesRepository.excludedFolders
+    ) { mediaStoreSongs, favorites, overrides, excluded ->
+        val filtered = mediaStoreSongs.filter { song ->
+            excluded.none { excludedPath -> song.parentPath?.startsWith(excludedPath) == true }
+        }
+        applySongDecorations(filtered, favorites, overrides)
     }.flowOn(Dispatchers.IO)
 
     override fun getSongById(songId: Long): Flow<Song?> = combine(
@@ -167,38 +173,46 @@ class MediaStoreMusicRepository @Inject constructor(
         emit(genres.sortedBy { it.name })
     }.flowOn(Dispatchers.IO)
 
-    override fun getFolders(): Flow<List<Folder>> = flow {
-        val foldersMap = mutableMapOf<String, Int>()
-        val collection = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
-        val projection = arrayOf(MediaStore.Audio.Media.DATA)
-        val selection = "${MediaStore.Audio.Media.IS_MUSIC} != 0"
+    override fun getFolders(): Flow<List<Folder>> = combine(
+        flow {
+            val foldersMap = mutableMapOf<String, Int>()
+            val collection = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
+            val projection = arrayOf(MediaStore.Audio.Media.DATA)
+            val selection = "${MediaStore.Audio.Media.IS_MUSIC} != 0"
 
-        context.contentResolver.query(collection, projection, selection, null, null)?.use { cursor ->
-            val dataCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA)
-            while (cursor.moveToNext()) {
-                val path = cursor.getString(dataCol)
-                val parentPath = path.substringBeforeLast('/')
-                foldersMap[parentPath] = (foldersMap[parentPath] ?: 0) + 1
+            context.contentResolver.query(collection, projection, selection, null, null)?.use { cursor ->
+                val dataCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA)
+                while (cursor.moveToNext()) {
+                    val path = cursor.getString(dataCol)
+                    val parentPath = path.substringBeforeLast('/')
+                    foldersMap[parentPath] = (foldersMap[parentPath] ?: 0) + 1
+                }
             }
-        }
-
-        val folders = foldersMap.map { (path, count) ->
+            emit(foldersMap)
+        },
+        preferencesRepository.excludedFolders
+    ) { foldersMap, excluded ->
+        foldersMap.filter { (path, _) ->
+            excluded.none { excludedPath -> path.startsWith(excludedPath) }
+        }.map { (path, count) ->
             Folder(
                 name = path.substringAfterLast('/'),
                 path = path,
                 trackCount = count
             )
         }.sortedBy { it.name }
-
-        emit(folders)
     }.flowOn(Dispatchers.IO)
 
     override fun getSongsByAlbum(albumId: Long): Flow<List<Song>> = combine(
         getMediaStoreSongs("${MediaStore.Audio.Media.ALBUM_ID} = ?", arrayOf(albumId.toString())),
         favoriteSongDao.getAllFavorites(),
-        artworkOverrideDao.getAllOverrides()
-    ) { mediaStoreSongs, favorites, overrides ->
-        applySongDecorations(mediaStoreSongs, favorites, overrides)
+        artworkOverrideDao.getAllOverrides(),
+        preferencesRepository.excludedFolders
+    ) { mediaStoreSongs, favorites, overrides, excluded ->
+        val filtered = mediaStoreSongs.filter { song ->
+            excluded.none { excludedPath -> song.parentPath?.startsWith(excludedPath) == true }
+        }
+        applySongDecorations(filtered, favorites, overrides)
     }.flowOn(Dispatchers.IO)
 
     override fun getAlbumsByArtist(artistName: String): Flow<List<Album>> = flow {
@@ -243,9 +257,13 @@ class MediaStoreMusicRepository @Inject constructor(
     override fun getRecentlyAdded(): Flow<List<Song>> = combine(
         getMediaStoreSongs(null, null, "${MediaStore.Audio.Media.DATE_ADDED} DESC"),
         favoriteSongDao.getAllFavorites(),
-        artworkOverrideDao.getAllOverrides()
-    ) { mediaStoreSongs, favorites, overrides ->
-        applySongDecorations(mediaStoreSongs.take(50), favorites, overrides)
+        artworkOverrideDao.getAllOverrides(),
+        preferencesRepository.excludedFolders
+    ) { mediaStoreSongs, favorites, overrides, excluded ->
+        val filtered = mediaStoreSongs.filter { song ->
+            excluded.none { excludedPath -> song.parentPath?.startsWith(excludedPath) == true }
+        }
+        applySongDecorations(filtered.take(50), favorites, overrides)
     }.flowOn(Dispatchers.IO)
 
     override fun getMostPlayed(): Flow<List<Song>> = combine(
@@ -401,8 +419,10 @@ class MediaStoreMusicRepository @Inject constructor(
     override fun getSongsByFolder(folderPath: String): Flow<List<Song>> = combine(
         getMediaStoreSongs("${MediaStore.Audio.Media.DATA} LIKE ?", arrayOf("$folderPath/%")),
         favoriteSongDao.getAllFavorites(),
-        artworkOverrideDao.getAllOverrides()
-    ) { mediaStoreSongs, favorites, overrides ->
+        artworkOverrideDao.getAllOverrides(),
+        preferencesRepository.excludedFolders
+    ) { mediaStoreSongs, favorites, overrides, excluded ->
+        if (excluded.contains(folderPath)) return@combine emptyList()
         val filtered = mediaStoreSongs.filter { it.parentPath == folderPath }
         applySongDecorations(filtered, favorites, overrides)
     }.flowOn(Dispatchers.IO)
@@ -410,9 +430,35 @@ class MediaStoreMusicRepository @Inject constructor(
     override fun getSongsByGenre(genreId: Long): Flow<List<Song>> = combine(
         getMediaStoreSongsByGenre(genreId),
         favoriteSongDao.getAllFavorites(),
-        artworkOverrideDao.getAllOverrides()
-    ) { mediaStoreSongs, favorites, overrides ->
-        applySongDecorations(mediaStoreSongs, favorites, overrides)
+        artworkOverrideDao.getAllOverrides(),
+        preferencesRepository.excludedFolders
+    ) { mediaStoreSongs, favorites, overrides, excluded ->
+        val filtered = mediaStoreSongs.filter { song ->
+            excluded.none { excludedPath -> song.parentPath?.startsWith(excludedPath) == true }
+        }
+        applySongDecorations(filtered, favorites, overrides)
+    }.flowOn(Dispatchers.IO)
+
+    override fun getLyrics(songId: Long): Flow<String?> = flow {
+        val song = getSongById(songId).first() ?: run {
+            emit(null)
+            return@flow
+        }
+
+        // 1. Try to find .lrc file in the same folder
+        val songFile = song.parentPath?.let { path ->
+            val fileName = song.contentUri.toString().substringAfterLast('/')
+            // We need the actual filename or a way to match it.
+            // MediaStore DATA column gives the full path.
+            // For now, let's try title.lrc as a common convention.
+            java.io.File(path, "${song.title}.lrc")
+        }
+        
+        if (songFile?.exists() == true) {
+            emit(songFile.readText())
+        } else {
+            emit(null)
+        }
     }.flowOn(Dispatchers.IO)
 
     private fun getMediaStoreSongsByGenre(genreId: Long): Flow<List<Song>> = flow {
