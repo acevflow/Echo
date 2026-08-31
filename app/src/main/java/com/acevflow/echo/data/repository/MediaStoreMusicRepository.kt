@@ -17,6 +17,7 @@ import com.acevflow.echo.data.local.entity.PlaylistSongCrossRef
 import com.acevflow.echo.data.local.entity.SearchHistory
 import com.acevflow.echo.data.local.entity.ArtworkOverride
 import com.acevflow.echo.data.preferences.UserPreferencesRepository
+import com.acevflow.echo.data.util.observe
 import com.acevflow.echo.domain.model.Album
 import com.acevflow.echo.domain.model.Artist
 import com.acevflow.echo.domain.model.Folder
@@ -26,8 +27,10 @@ import com.acevflow.echo.domain.model.Song
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
@@ -50,17 +53,23 @@ class MediaStoreMusicRepository @Inject constructor(
     private val preferencesRepository: UserPreferencesRepository
 ) : MusicRepository {
 
-    override fun getSongs(): Flow<List<Song>> = combine(
-        getMediaStoreSongs(null),
-        favoriteSongDao.getAllFavorites(),
-        artworkOverrideDao.getAllOverrides(),
-        preferencesRepository.excludedFolders
-    ) { mediaStoreSongs, favorites, overrides, excluded ->
-        val filtered = mediaStoreSongs.filter { song ->
-            excluded.none { excludedPath -> song.parentPath?.startsWith(excludedPath) == true }
-        }
-        applySongDecorations(filtered, favorites, overrides)
-    }.flowOn(Dispatchers.IO)
+    @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
+    override fun getSongs(): Flow<List<Song>> = context.contentResolver
+        .observe(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI)
+        .debounce(300) // Prevent rapid UI flickers during batch operations
+        .flatMapLatest {
+            combine(
+                getMediaStoreSongs(null),
+                favoriteSongDao.getAllFavorites(),
+                artworkOverrideDao.getAllOverrides(),
+                preferencesRepository.excludedFolders
+            ) { mediaStoreSongs, favorites, overrides, excluded ->
+                val filtered = mediaStoreSongs.filter { song ->
+                    excluded.none { excludedPath -> song.parentPath?.startsWith(excludedPath) == true }
+                }
+                applySongDecorations(filtered, favorites, overrides)
+            }
+        }.flowOn(Dispatchers.IO)
 
     override fun getSongById(songId: Long): Flow<Song?> = combine(
         getMediaStoreSongs("${MediaStore.Audio.Media._ID} = ?", arrayOf(songId.toString())),
@@ -75,42 +84,48 @@ class MediaStoreMusicRepository @Inject constructor(
         )
     }.flowOn(Dispatchers.IO)
 
-    override fun getAlbums(): Flow<List<Album>> = flow {
-        val albums = mutableListOf<Album>()
-        val collection = MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI
-        val projection = arrayOf(
-            MediaStore.Audio.Albums._ID,
-            MediaStore.Audio.Albums.ALBUM,
-            MediaStore.Audio.Albums.ARTIST,
-            MediaStore.Audio.Albums.NUMBER_OF_SONGS
-        )
-        val sortOrder = "${MediaStore.Audio.Albums.ALBUM} ASC"
-
-        context.contentResolver.query(collection, projection, null, null, sortOrder)?.use { cursor ->
-            val idCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums._ID)
-            val albumCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums.ALBUM)
-            val artistCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums.ARTIST)
-            val numSongsCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums.NUMBER_OF_SONGS)
-
-            while (cursor.moveToNext()) {
-                val id = cursor.getLong(idCol)
-                val artworkUri = ContentUris.withAppendedId(
-                    "content://media/external/audio/albumart".toUri(),
-                    id
+    @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
+    override fun getAlbums(): Flow<List<Album>> = context.contentResolver
+        .observe(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI)
+        .debounce(300)
+        .flatMapLatest {
+            flow {
+                val albums = mutableListOf<Album>()
+                val collection = MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI
+                val projection = arrayOf(
+                    MediaStore.Audio.Albums._ID,
+                    MediaStore.Audio.Albums.ALBUM,
+                    MediaStore.Audio.Albums.ARTIST,
+                    MediaStore.Audio.Albums.NUMBER_OF_SONGS
                 )
-                albums.add(
-                    Album(
-                        id = id,
-                        title = cursor.getString(albumCol),
-                        artist = cursor.getString(artistCol),
-                        artworkUri = artworkUri,
-                        trackCount = cursor.getInt(numSongsCol)
-                    )
-                )
+                val sortOrder = "${MediaStore.Audio.Albums.ALBUM} ASC"
+
+                context.contentResolver.query(collection, projection, null, null, sortOrder)?.use { cursor ->
+                    val idCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums._ID)
+                    val albumCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums.ALBUM)
+                    val artistCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums.ARTIST)
+                    val numSongsCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums.NUMBER_OF_SONGS)
+
+                    while (cursor.moveToNext()) {
+                        val id = cursor.getLong(idCol)
+                        val artworkUri = ContentUris.withAppendedId(
+                            "content://media/external/audio/albumart".toUri(),
+                            id
+                        )
+                        albums.add(
+                            Album(
+                                id = id,
+                                title = cursor.getString(albumCol),
+                                artist = cursor.getString(artistCol),
+                                artworkUri = artworkUri,
+                                trackCount = cursor.getInt(numSongsCol)
+                            )
+                        )
+                    }
+                }
+                emit(albums)
             }
-        }
-        emit(albums)
-    }.flowOn(Dispatchers.IO)
+        }.flowOn(Dispatchers.IO)
 
     override fun getArtists(): Flow<List<Artist>> = flow {
         val artists = mutableListOf<Artist>()

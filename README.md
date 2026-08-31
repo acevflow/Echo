@@ -16,6 +16,7 @@ Echo is built from the ground up using Jetpack Compose and modern Android archit
 
 ### Library & Discovery
 *   **Hierarchical Browsing**: Organize your collection by **Songs**, **Albums**, **Artists**, **Genres**, or **Folders**.
+*   **Reactive Library**: Real-time synchronization with the Android system; the library updates instantly when music is added or removed from the device.
 *   **Batch Management**: Efficiently manage your library with **Multi-Select** support and batch actions for playlists, the playback queue, and **Metadata Editing**.
 *   **Smart Discovery**: Dynamic "Most Played" and "Recently Added" collections that adapt to your habits.
 *   **Instant Search**: Real-time filtering across your entire library with immediate playback support.
@@ -58,6 +59,10 @@ Echo is built from the ground up using Jetpack Compose and modern Android archit
 
 For more detailed instructions, see the [Build & Installation guide](docs/build.md).
 
+## Development
+
+Echo is developed with a strict adherence to **Clean Architecture** principles, ensuring the codebase remains modular, testable, and maintainable. The project includes a robust **Unit Testing** suite using MockK and Turbine to guarantee the integrity of reactive data streams.
+
 ## Documentation
 
 - [**Architecture**](docs/architecture.md) - Learn about the Clean Architecture implementation.
@@ -66,7 +71,7 @@ For more detailed instructions, see the [Build & Installation guide](docs/build.
 
 ## Technical Stack
 *   **UI**: Jetpack Compose (Material 3, Window Size Classes & Shared Element Transitions)
-*   **Logic**: Kotlin Coroutines & Flow
+*   **Logic**: Kotlin Coroutines, Flow, **MockK** & **Turbine** (Testing)
 *   **DI**: Dagger Hilt
 *   **Database**: Room (Relational persistence)
 *   **Settings**: Jetpack DataStore (Reactive preferences)
@@ -78,7 +83,7 @@ For more detailed instructions, see the [Build & Installation guide](docs/build.
 ## Roadmap
 
 ### Next Release
-- [ ] **Technical Polish**: Automated unit tests for repositories and comprehensive performance profiling.
+- [ ] **Performance Profiling**: Comprehensive benchmarking using Macrobenchmark and Baseline Profile optimization.
 - [ ] **Visual Polish**: Animated artwork effects and custom transition curves.
 - [ ] **Enhanced Discovery**: Personal year-in-review and advanced library statistics.
 
