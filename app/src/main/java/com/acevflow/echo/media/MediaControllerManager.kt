@@ -208,6 +208,15 @@ class MediaControllerManager @Inject constructor(
         }
     }
 
+    fun shuffleAll(mediaItems: List<MediaItem>) {
+        _controller.value?.run {
+            setMediaItems(mediaItems)
+            shuffleModeEnabled = true
+            prepare()
+            play()
+        }
+    }
+
     fun pause() {
         _controller.value?.pause()
     }

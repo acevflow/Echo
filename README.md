@@ -33,6 +33,7 @@ Echo is built from the ground up using Jetpack Compose and modern Android archit
 *   **Automation**: Integrated **Sleep Timer** with customizable intervals to automatically stop playback.
 *   **Synchronized Lyrics**: Support for both embedded and external `.lrc` sidecar files with reactive, auto-scrolling display.
 *   **Dynamic UI**: Full support for **Light/Dark/System** modes and **Material You Dynamic Color** (Android 12+).
+*   **Ambient Presence**: Quick access via **Static and Dynamic Launcher Shortcuts** for Search, Shuffle All, and your most-played playlists.
 *   **Home Screen Widget**: Control your music instantly using a modern Jetpack Glance widget.
 
 ## Screenshots
@@ -77,6 +78,7 @@ For more detailed instructions, see the [Build & Installation guide](docs/build.
 ## Roadmap
 
 ### Next Release
+- [ ] **Technical Polish**: Automated unit tests for repositories and comprehensive performance profiling.
 - [ ] **Visual Polish**: Animated artwork effects and custom transition curves.
 - [ ] **Enhanced Discovery**: Personal year-in-review and advanced library statistics.
 

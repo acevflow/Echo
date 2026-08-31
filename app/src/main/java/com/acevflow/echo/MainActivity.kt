@@ -45,6 +45,7 @@ import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSiz
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -52,6 +53,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -71,6 +73,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        // ... rest of onCreate ...
         setContent {
             val windowSizeClass = calculateWindowSizeClass(this)
             val useNavigationRail = windowSizeClass.widthSizeClass != WindowWidthSizeClass.Compact
@@ -85,13 +88,19 @@ class MainActivity : ComponentActivity() {
                 else -> isSystemInDarkTheme()
             }
 
+            val navController = rememberNavController()
+
+            // Handle incoming intents
+            LaunchedEffect(intent) {
+                handleIntent(intent, mainViewModel, navController)
+            }
+
             EchoTheme(
                 darkTheme = darkTheme,
                 dynamicColor = dynamicColorEnabled
             ) {
                 SharedTransitionLayout {
                     CompositionLocalProvider(LocalSharedTransitionScope provides this) {
-                        val navController = rememberNavController()
                         val navBackStackEntry by navController.currentBackStackEntryAsState()
                         val currentDestination = navBackStackEntry?.destination
                         
@@ -259,5 +268,22 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    private fun handleIntent(intent: android.content.Intent, viewModel: MainViewModel, navController: androidx.navigation.NavHostController) {
+        when (intent.getStringExtra("shortcut")) {
+            "search" -> navController.navigate(Screen.Search.route)
+            "shuffle_all" -> viewModel.shuffleAll()
+        }
+        
+        val playlistId = intent.getLongExtra("playlist_id", -1L)
+        if (playlistId != -1L) {
+            viewModel.playPlaylist(playlistId)
+        }
+    }
+
+    override fun onNewIntent(intent: android.content.Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
     }
 }

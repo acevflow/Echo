@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Echo</string>
+    <string name="shortcut_search_label">Search</string>
+    <string name="shortcut_search_short_label">Search</string>
+    <string name="shortcut_shuffle_all_label">Shuffle All</string>
+    <string name="shortcut_shuffle_all_short_label">Shuffle</string>
 </resources>

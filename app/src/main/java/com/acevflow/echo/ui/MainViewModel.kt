@@ -1,9 +1,19 @@
 package com.acevflow.echo.ui
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import androidx.media3.common.MediaItem
+import androidx.media3.common.MediaMetadata
 import com.acevflow.echo.data.preferences.UserPreferencesRepository
+import com.acevflow.echo.data.repository.MusicRepository
+import com.acevflow.echo.data.repository.ShortcutRepository
+import com.acevflow.echo.domain.model.Song
 import com.acevflow.echo.media.MediaControllerManager
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
@@ -13,7 +23,9 @@ import javax.inject.Inject
 @HiltViewModel
 class MainViewModel @Inject constructor(
     private val mediaControllerManager: MediaControllerManager,
-    private val preferencesRepository: UserPreferencesRepository
+    private val preferencesRepository: UserPreferencesRepository,
+    private val musicRepository: MusicRepository,
+    private val shortcutRepository: ShortcutRepository
 ) : ViewModel() {
 
     val isPlaying = mediaControllerManager.isPlaying
@@ -28,6 +40,10 @@ class MainViewModel @Inject constructor(
 
     init {
         mediaControllerManager.initialize()
+        
+        musicRepository.getPlaylists()
+            .onEach { shortcutRepository.updateDynamicShortcuts(it) }
+            .launchIn(viewModelScope)
     }
 
     fun resume() {
@@ -44,5 +60,36 @@ class MainViewModel @Inject constructor(
 
     fun cancelSleepTimer() {
         mediaControllerManager.cancelSleepTimer()
+    }
+
+    fun shuffleAll() {
+        viewModelScope.launch {
+            val songs = musicRepository.getSongs().first()
+            mediaControllerManager.shuffleAll(songs.map { toMediaItem(it) })
+        }
+    }
+
+    fun playPlaylist(playlistId: Long) {
+        viewModelScope.launch {
+            val songs = musicRepository.getSongsInPlaylist(playlistId).first()
+            if (songs.isNotEmpty()) {
+                mediaControllerManager.setQueue(songs.map { toMediaItem(it) }, 0)
+            }
+        }
+    }
+
+    private fun toMediaItem(song: Song): MediaItem {
+        return MediaItem.Builder()
+            .setMediaId(song.id.toString())
+            .setUri(song.contentUri)
+            .setMediaMetadata(
+                MediaMetadata.Builder()
+                    .setTitle(song.title)
+                    .setArtist(song.artist)
+                    .setAlbumTitle(song.album)
+                    .setArtworkUri(song.artworkUri)
+                    .build()
+            )
+            .build()
     }
 }

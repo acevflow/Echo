@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="search"
+        android:enabled="true"
+        android:icon="@drawable/ic_search"
+        android:shortcutShortLabel="@string/shortcut_search_short_label"
+        android:shortcutLongLabel="@string/shortcut_search_label">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.acevflow.echo"
+            android:targetClass="com.acevflow.echo.MainActivity">
+            <extra android:name="shortcut" android:value="search" />
+        </intent>
+        <categories android:name="android.shortcut.conversation" />
+    </shortcut>
+    <shortcut
+        android:shortcutId="shuffle_all"
+        android:enabled="true"
+        android:icon="@drawable/ic_shuffle"
+        android:shortcutShortLabel="@string/shortcut_shuffle_all_short_label"
+        android:shortcutLongLabel="@string/shortcut_shuffle_all_label">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.acevflow.echo"
+            android:targetClass="com.acevflow.echo.MainActivity">
+            <extra android:name="shortcut" android:value="shuffle_all" />
+        </intent>
+    </shortcut>
+</shortcuts>
