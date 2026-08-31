@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
@@ -25,7 +26,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.acevflow.echo.domain.model.EqPreset
 import com.acevflow.echo.ui.theme.Dims
@@ -55,13 +55,12 @@ fun EqualizerScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 24.dp),
+                    .padding(bottom = 32.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
                     text = "Master Equalizer",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.headlineMedium,
                     modifier = Modifier.weight(1f)
                 )
                 Switch(
@@ -70,15 +69,16 @@ fun EqualizerScreen(
                 )
             }
 
-            Box(modifier = Modifier.padding(bottom = 24.dp)) {
+            Box(modifier = Modifier.padding(bottom = 32.dp)) {
                 Button(
                     onClick = { showPresets = true },
                     enabled = enabled,
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
                         contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    ),
+                    shape = RoundedCornerShape(Dims.SmallRadius)
                 ) {
                     Text(text = "Preset: ${selectedPreset ?: "Custom"}")
                 }
@@ -112,14 +112,12 @@ fun EqualizerScreen(
                     ) {
                         Text(
                             text = label,
-                            style = MaterialTheme.typography.bodyLarge,
-                            fontWeight = FontWeight.SemiBold
+                            style = MaterialTheme.typography.bodyLarge
                         )
                         Text(
                             text = if (gain > 0) "+$gain dB" else "$gain dB",
                             style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.primary,
-                            fontWeight = FontWeight.Bold
+                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
                         )
                     }
                     

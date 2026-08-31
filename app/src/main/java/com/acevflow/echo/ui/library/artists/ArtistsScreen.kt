@@ -4,7 +4,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.CircularProgressIndicator
@@ -67,20 +66,16 @@ fun ArtistList(
 ) {
     LazyColumn(
         modifier = modifier.fillMaxSize(),
-        contentPadding = PaddingValues(bottom = Dims.MiniPlayerHeight + Dims.ScreenPadding)
+        contentPadding = PaddingValues(
+            top = Dims.TinyPadding,
+            bottom = Dims.MiniPlayerHeight + Dims.ScreenPadding
+        )
     ) {
-        itemsIndexed(artists, key = { _, artist -> artist.id }) { index, artist ->
+        itemsIndexed(artists, key = { _, artist -> artist.id }) { _, artist ->
             EchoArtistItem(
                 artist = artist,
                 modifier = Modifier.clickable { onArtistClick(artist) }
             )
-            if (index < artists.size - 1) {
-                HorizontalDivider(
-                    modifier = Modifier.padding(horizontal = Dims.ElementPadding),
-                    thickness = 0.5.dp,
-                    color = MaterialTheme.colorScheme.surfaceVariant
-                )
-            }
         }
     }
 }

@@ -134,7 +134,7 @@ fun PlayerScreen(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = Dims.ElementPadding),
+                        .padding(bottom = Dims.SmallPadding),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -149,8 +149,7 @@ fun PlayerScreen(
                     Text(
                         text = "NOW PLAYING",
                         style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
-                        fontWeight = FontWeight.ExtraBold,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                         letterSpacing = 2.sp
                     )
 
@@ -162,14 +161,14 @@ fun PlayerScreen(
                     }
                 }
 
-                Spacer(modifier = Modifier.weight(0.4f))
+                Spacer(modifier = Modifier.weight(0.5f))
 
                 // Artwork or Lyrics
                 Box(
                     modifier = Modifier
-                        .fillMaxWidth(0.95f)
+                        .fillMaxWidth(0.98f)
                         .aspectRatio(1f)
-                        .shadow(48.dp, RoundedCornerShape(Dims.CardRadius), spotColor = Color.Black.copy(alpha = 0.5f))
+                        .shadow(64.dp, RoundedCornerShape(Dims.CardRadius), spotColor = Color.Black.copy(alpha = 0.3f))
                         .clip(RoundedCornerShape(Dims.CardRadius))
                         .clickable { showLyrics = !showLyrics }
                 ) {
@@ -206,14 +205,13 @@ fun PlayerScreen(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 4.dp),
+                        .padding(horizontal = 8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
                             text = currentMediaItem?.mediaMetadata?.title?.toString() ?: "Unknown",
-                            style = MaterialTheme.typography.displayLarge.copy(fontSize = 28.sp),
-                            fontWeight = FontWeight.ExtraBold,
+                            style = MaterialTheme.typography.displayLarge.copy(fontSize = 30.sp),
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
@@ -221,7 +219,7 @@ fun PlayerScreen(
                         Text(
                             text = currentMediaItem?.mediaMetadata?.artist?.toString() ?: "Unknown Artist",
                             style = MaterialTheme.typography.titleLarge,
-                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
+                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
@@ -229,18 +227,18 @@ fun PlayerScreen(
 
                     IconButton(
                         onClick = { viewModel.toggleFavorite() },
-                        modifier = Modifier.size(48.dp)
+                        modifier = Modifier.size(56.dp)
                     ) {
                         Icon(
                             imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                             contentDescription = "Favorite",
-                            tint = if (isFavorite) FavoriteRed else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                            modifier = Modifier.size(28.dp)
+                            tint = if (isFavorite) FavoriteRed else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
+                            modifier = Modifier.size(32.dp)
                         )
                     }
                 }
 
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(32.dp))
 
                 // Progress Slider
                 var isDragging by remember { mutableStateOf(false) }
@@ -297,8 +295,8 @@ fun PlayerScreen(
                         Icon(
                             imageVector = Icons.Default.Shuffle,
                             contentDescription = "Shuffle",
-                            tint = if (shuffleModeEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
-                            modifier = Modifier.size(28.dp)
+                            tint = if (shuffleModeEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
+                            modifier = Modifier.size(24.dp)
                         )
                     }
 
@@ -310,16 +308,16 @@ fun PlayerScreen(
                             Icon(
                                 imageVector = Icons.Default.SkipPrevious,
                                 contentDescription = "Previous",
-                                modifier = Modifier.size(44.dp)
+                                modifier = Modifier.size(48.dp)
                             )
                         }
 
-                        Spacer(modifier = Modifier.width(16.dp))
+                        Spacer(modifier = Modifier.width(20.dp))
 
                         Surface(
                             modifier = Modifier
-                                .size(84.dp)
-                                .shadow(24.dp, CircleShape, spotColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f))
+                                .size(88.dp)
+                                .shadow(32.dp, CircleShape, spotColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f))
                                 .clip(CircleShape)
                                 .clickable {
                                     if (isPlaying) viewModel.pause() else viewModel.play()
@@ -330,19 +328,19 @@ fun PlayerScreen(
                                 Icon(
                                     imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
                                     contentDescription = if (isPlaying) "Pause" else "Play",
-                                    modifier = Modifier.size(42.dp),
+                                    modifier = Modifier.size(44.dp),
                                     tint = MaterialTheme.colorScheme.onPrimary
                                 )
                             }
                         }
 
-                        Spacer(modifier = Modifier.width(16.dp))
+                        Spacer(modifier = Modifier.width(20.dp))
 
                         IconButton(onClick = { viewModel.skipToNext() }) {
                             Icon(
                                 imageVector = Icons.Default.SkipNext,
                                 contentDescription = "Next",
-                                modifier = Modifier.size(44.dp)
+                                modifier = Modifier.size(48.dp)
                             )
                         }
                     }
@@ -354,8 +352,8 @@ fun PlayerScreen(
                                 else -> Icons.Default.Repeat
                             },
                             contentDescription = "Repeat",
-                            tint = if (repeatMode != Player.REPEAT_MODE_OFF) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
-                            modifier = Modifier.size(28.dp)
+                            tint = if (repeatMode != Player.REPEAT_MODE_OFF) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
+                            modifier = Modifier.size(24.dp)
                         )
                     }
                 }

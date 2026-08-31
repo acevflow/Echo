@@ -20,6 +20,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
@@ -69,26 +70,32 @@ fun SearchScreen(
                 onActiveChange = { },
                 placeholder = { 
                     Text(
-                        text = "Search your library",
+                        text = "Search music...",
                         style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
                     ) 
                 },
                 leadingIcon = { 
                     Icon(
                         imageVector = Icons.Default.Search, 
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary
+                        tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
                     ) 
                 },
+                trailingIcon = {
+                    if (query.isNotEmpty()) {
+                        IconButton(onClick = { viewModel.onQueryChange("") }) {
+                            Icon(Icons.Default.Close, contentDescription = "Clear")
+                        }
+                    }
+                },
                 colors = SearchBarDefaults.colors(
-                    containerColor = MaterialTheme.colorScheme.surface,
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
                 ),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = Dims.ScreenPadding)
-                    .padding(top = 16.dp, bottom = 8.dp)
-                    .shadow(12.dp, CircleShape)
+                    .padding(top = 8.dp, bottom = 12.dp)
             ) { }
 
             Box(modifier = Modifier.fillMaxSize()) {
@@ -148,17 +155,17 @@ fun SearchHistoryContent(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(Dims.ScreenPadding),
+                .padding(horizontal = Dims.ScreenPadding, vertical = 8.dp),
             horizontalArrangement = androidx.compose.foundation.layout.Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 text = "Recent Searches",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
             )
             androidx.compose.material3.TextButton(onClick = onClearHistory) {
-                Text("Clear All")
+                Text("Clear", style = MaterialTheme.typography.labelMedium)
             }
         }
 
@@ -184,7 +191,7 @@ fun SearchHistoryContent(
                             .padding(start = Dims.ElementPadding),
                         style = MaterialTheme.typography.bodyLarge
                     )
-                    androidx.compose.material3.IconButton(
+                    IconButton(
                         onClick = { onDeleteHistoryItem(query) },
                         modifier = Modifier.size(24.dp)
                     ) {

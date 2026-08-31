@@ -64,22 +64,21 @@ fun MiniPlayer(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = Dims.ScreenPadding, vertical = Dims.TinyPadding)
-            .shadow(20.dp, RoundedCornerShape(Dims.CardRadius))
+            .shadow(24.dp, RoundedCornerShape(Dims.CardRadius), spotColor = Color.Black.copy(alpha = 0.1f))
             .clip(RoundedCornerShape(Dims.CardRadius))
             .clickable(onClick = onClick),
         color = MaterialTheme.colorScheme.surface,
-        tonalElevation = 4.dp
+        tonalElevation = 2.dp
     ) {
         Column {
             Row(
                 modifier = Modifier
-                    .padding(horizontal = Dims.SmallPadding, vertical = Dims.SmallPadding)
-                    .fillMaxWidth()
-                    .height(Dims.MiniPlayerHeight - 12.dp),
+                    .padding(horizontal = Dims.SmallPadding, vertical = 12.dp)
+                    .fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 val imageModifier = Modifier
-                    .size(56.dp)
+                    .size(52.dp)
                     .clip(RoundedCornerShape(Dims.SmallRadius))
 
                 Box {
@@ -98,7 +97,7 @@ fun MiniPlayer(
                     )
                 }
                 
-                Spacer(modifier = Modifier.width(Dims.ElementPadding))
+                Spacer(modifier = Modifier.width(Dims.SmallPadding))
 
                 Column(
                     modifier = Modifier.weight(1f)
@@ -111,8 +110,8 @@ fun MiniPlayer(
                     )
                     Text(
                         text = currentMediaItem?.mediaMetadata?.artist?.toString() ?: "Unknown Artist",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -122,12 +121,12 @@ fun MiniPlayer(
                     onClick = {
                         if (isPlaying) viewModel.pause() else viewModel.resume()
                     },
-                    modifier = Modifier.size(48.dp)
+                    modifier = Modifier.size(44.dp)
                 ) {
                     Icon(
                         imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
                         contentDescription = if (isPlaying) "Pause" else "Play",
-                        modifier = Modifier.size(32.dp),
+                        modifier = Modifier.size(28.dp),
                         tint = MaterialTheme.colorScheme.primary
                     )
                 }
@@ -136,17 +135,17 @@ fun MiniPlayer(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = Dims.SmallPadding)
-                    .padding(bottom = 6.dp)
+                    .padding(horizontal = Dims.CardRadius)
+                    .padding(bottom = 8.dp)
             ) {
                 LinearProgressIndicator(
                     progress = { progress },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(3.dp)
+                        .height(2.dp)
                         .clip(CircleShape),
                     color = MaterialTheme.colorScheme.primary,
-                    trackColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                    trackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
                     strokeCap = StrokeCap.Round
                 )
             }

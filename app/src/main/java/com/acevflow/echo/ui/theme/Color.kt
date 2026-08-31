@@ -3,22 +3,22 @@ package com.acevflow.echo.ui.theme
 import androidx.compose.ui.graphics.Color
 
 // Dark Palette - "Midnight Harmony"
-val MidnightBackground = Color(0xFF0A0A0B)
-val MidnightSurface = Color(0xFF141417)
-val MidnightSurfaceVariant = Color(0xFF1C1C21)
-val MidnightPrimary = Color(0xFFE0E0E6) // Clean, airy primary
-val MidnightSecondary = Color(0xFFAAB0C6) // Cool muted slate
-val MidnightTertiary = Color(0xFF8E99B3)
+val MidnightBackground = Color(0xFF0C0C0E)
+val MidnightSurface = Color(0xFF16161A)
+val MidnightSurfaceVariant = Color(0xFF1F1F24)
+val MidnightPrimary = Color(0xFFF0F0F5) // Refined, slightly brighter
+val MidnightSecondary = Color(0xFFB0B8D0) // Cleaner slate
+val MidnightTertiary = Color(0xFF94A3B8)
 
 // Light Palette - "Morning Mist"
-val SnowBackground = Color(0xFFFDFDFD)
-val SnowSurface = Color(0xFFF2F2F7)
-val SnowSurfaceVariant = Color(0xFFE5E5EA)
-val SnowPrimary = Color(0xFF1C1C1E) // Strong, clean contrast
-val SnowSecondary = Color(0xFF636366) // Soft, legible secondary
-val SnowTertiary = Color(0xFF8E8E93)
+val SnowBackground = Color(0xFFFCFCFD)
+val SnowSurface = Color(0xFFF3F4F6)
+val SnowSurfaceVariant = Color(0xFFE5E7EB)
+val SnowPrimary = Color(0xFF111827) // Deeper contrast
+val SnowSecondary = Color(0xFF4B5563) // Modern secondary
+val SnowTertiary = Color(0xFF9CA3AF)
 
 // Common Colors
-val FavoriteRed = Color(0xFFE57373) // Softer, premium red
-val GrayText = Color(0xFF757575)
-val DividerColor = Color(0x1F757575)
+val FavoriteRed = Color(0xFFF87171) // More vibrant but premium red
+val GrayText = Color(0xFF9CA3AF)
+val DividerColor = Color(0x1F9CA3AF)

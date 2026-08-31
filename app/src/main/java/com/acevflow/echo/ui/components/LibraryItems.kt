@@ -22,7 +22,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
@@ -38,7 +37,6 @@ fun EchoAlbumItem(
     Surface(
         modifier = modifier
             .fillMaxWidth()
-            .shadow(4.dp, RoundedCornerShape(Dims.CardRadius))
             .clip(RoundedCornerShape(Dims.CardRadius)),
         color = Color.Transparent
     ) {
@@ -49,21 +47,21 @@ fun EchoAlbumItem(
                 modifier = Modifier
                     .fillMaxWidth()
                     .aspectRatio(1f)
+                    .shadow(16.dp, RoundedCornerShape(Dims.CardRadius), spotColor = Color.Black.copy(alpha = 0.1f))
                     .clip(RoundedCornerShape(Dims.CardRadius)),
                 contentScale = ContentScale.Crop
             )
-            Column(modifier = Modifier.padding(horizontal = Dims.SmallPadding, vertical = 8.dp)) {
+            Column(modifier = Modifier.padding(vertical = 12.dp)) {
                 Text(
                     text = album.title,
                     style = MaterialTheme.typography.titleMedium,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    fontWeight = FontWeight.Bold
+                    overflow = TextOverflow.Ellipsis
                 )
                 Text(
                     text = album.artist,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -80,27 +78,26 @@ fun EchoArtistItem(
     Surface(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = Dims.ScreenPadding, vertical = 4.dp)
+            .padding(horizontal = Dims.ScreenPadding, vertical = 2.dp)
             .clip(RoundedCornerShape(Dims.SmallRadius)),
         color = Color.Transparent
     ) {
         Row(
-            modifier = Modifier.padding(Dims.SmallPadding),
+            modifier = Modifier.padding(vertical = Dims.TinyPadding),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Surface(
                 modifier = Modifier
-                    .size(56.dp)
-                    .shadow(2.dp, CircleShape)
+                    .size(Dims.ArtworkSmall)
                     .clip(CircleShape),
-                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Icon(
                         imageVector = Icons.Default.Person,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(28.dp)
+                        tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
+                        modifier = Modifier.size(24.dp)
                     )
                 }
             }
@@ -114,13 +111,12 @@ fun EchoArtistItem(
                     text = artist.name,
                     style = MaterialTheme.typography.titleMedium,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    fontWeight = FontWeight.Bold
+                    overflow = TextOverflow.Ellipsis
                 )
                 Text(
-                    text = "${artist.albumCount} albums • ${artist.trackCount} songs",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                    text = "${artist.trackCount} songs",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )

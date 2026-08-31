@@ -17,7 +17,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.ui.graphics.Color
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.PlaylistPlay
 import androidx.compose.material.icons.filled.Album
@@ -123,12 +125,12 @@ class MainActivity : ComponentActivity() {
                                         title = { 
                                             Text(
                                                 text = "Echo",
-                                                style = MaterialTheme.typography.displayLarge.copy(fontSize = 24.sp),
+                                                style = MaterialTheme.typography.headlineMedium,
                                                 color = MaterialTheme.colorScheme.onBackground
                                             ) 
                                         },
                                         colors = TopAppBarDefaults.topAppBarColors(
-                                            containerColor = MaterialTheme.colorScheme.background,
+                                            containerColor = Color.Transparent,
                                             titleContentColor = MaterialTheme.colorScheme.onBackground
                                         )
                                     )
@@ -155,41 +157,40 @@ class MainActivity : ComponentActivity() {
                                         
                                         val showNavBar = items.any { it.first.route == currentDestination?.route }
                                         if (showNavBar) {
-                                        NavigationBar(
-                                            containerColor = MaterialTheme.colorScheme.background,
-                                            tonalElevation = 0.dp,
-                                            windowInsets = WindowInsets(0)
-                                        ) {
-                                            items.forEach { (screen, label, icon) ->
-                                                val isSelected = currentDestination?.hierarchy?.any { it.route == screen.route } == true
-                                                NavigationBarItem(
-                                                    icon = { 
-                                                        Icon(
-                                                            imageVector = icon, 
-                                                            contentDescription = null,
-                                                            tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-                                                        ) 
-                                                    },
-                                                    label = { 
-                                                        Text(
-                                                            text = label,
-                                                            style = MaterialTheme.typography.labelMedium,
-                                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
-                                                        ) 
-                                                    },
-                                                    selected = isSelected,
-                                                    onClick = {
-                                                        navController.navigate(screen.route) {
-                                                            popUpTo(navController.graph.findStartDestination().id) {
-                                                                saveState = true
+                                            NavigationBar(
+                                                containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f),
+                                                tonalElevation = 0.dp,
+                                                windowInsets = WindowInsets(0)
+                                            ) {
+                                                items.forEach { (screen, label, icon) ->
+                                                    val isSelected = currentDestination?.hierarchy?.any { it.route == screen.route } == true
+                                                    NavigationBarItem(
+                                                        icon = { 
+                                                            Icon(
+                                                                imageVector = icon, 
+                                                                contentDescription = null,
+                                                                modifier = Modifier.size(24.dp)
+                                                            ) 
+                                                        },
+                                                        label = { 
+                                                            Text(
+                                                                text = label,
+                                                                style = MaterialTheme.typography.labelMedium
+                                                            ) 
+                                                        },
+                                                        selected = isSelected,
+                                                        onClick = {
+                                                            navController.navigate(screen.route) {
+                                                                popUpTo(navController.graph.findStartDestination().id) {
+                                                                    saveState = true
+                                                                }
+                                                                launchSingleTop = true
+                                                                restoreState = true
                                                             }
-                                                            launchSingleTop = true
-                                                            restoreState = true
                                                         }
-                                                    }
-                                                )
+                                                    )
+                                                }
                                             }
-                                        }
                                         }
                                     }
                                 }

@@ -65,18 +65,17 @@ fun EchoSongItem(
     Surface(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = Dims.ScreenPadding, vertical = 4.dp)
-            .shadow(if (isSelected) 4.dp else 0.dp, RoundedCornerShape(Dims.SmallRadius))
+            .padding(horizontal = Dims.ScreenPadding, vertical = 2.dp)
             .clip(RoundedCornerShape(Dims.SmallRadius))
             .combinedClickable(
                 onClick = onClick,
                 onLongClick = onLongClick
             ),
-        color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else Color.Transparent,
-        tonalElevation = if (isSelected) 4.dp else 0.dp
+        color = if (isSelected) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f) else Color.Transparent,
+        tonalElevation = 0.dp
     ) {
         Row(
-            modifier = Modifier.padding(Dims.SmallPadding),
+            modifier = Modifier.padding(horizontal = Dims.SmallPadding, vertical = Dims.TinyPadding),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(contentAlignment = Alignment.Center) {
@@ -122,12 +121,13 @@ fun EchoSongItem(
                     text = song.title,
                     style = MaterialTheme.typography.titleMedium,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
                     text = "${song.artist} • ${song.album}",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f) else MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )

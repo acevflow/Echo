@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Slider
@@ -24,7 +25,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.acevflow.echo.ui.theme.Dims
 
@@ -51,17 +51,17 @@ fun SettingsScreen(
         ) {
             Text(
                 text = "Appearance",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.headlineMedium,
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.padding(bottom = Dims.ElementPadding)
             )
 
             Surface(
-                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                shape = MaterialTheme.shapes.medium
+                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                shape = RoundedCornerShape(Dims.CardRadius),
+                tonalElevation = 0.dp
             ) {
-                Column(Modifier.selectableGroup().padding(Dims.SmallPadding)) {
+                Column(Modifier.selectableGroup().padding(Dims.TinyPadding)) {
                     ThemeOption("System default", themeMode == 0) { viewModel.setThemeMode(0) }
                     ThemeOption("Light", themeMode == 1) { viewModel.setThemeMode(1) }
                     ThemeOption("Dark", themeMode == 2) { viewModel.setThemeMode(2) }
@@ -99,11 +99,11 @@ fun SettingsScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable(onClick = onNavigateToExcludedFolders),
-                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                shape = MaterialTheme.shapes.medium
+                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                shape = RoundedCornerShape(Dims.SmallRadius)
             ) {
                 Row(
-                    modifier = Modifier.padding(Dims.ElementPadding),
+                    modifier = Modifier.padding(Dims.SmallPadding),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
@@ -113,8 +113,8 @@ fun SettingsScreen(
                         )
                         Text(
                             text = "Hide specific folders from your music library",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                         )
                     }
                 }
@@ -124,8 +124,7 @@ fun SettingsScreen(
 
             Text(
                 text = "Audio",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.headlineMedium,
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.padding(bottom = Dims.ElementPadding)
             )
@@ -157,11 +156,11 @@ fun SettingsScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable(onClick = onNavigateToEqualizer),
-                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                shape = MaterialTheme.shapes.medium
+                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                shape = RoundedCornerShape(Dims.SmallRadius)
             ) {
                 Row(
-                    modifier = Modifier.padding(Dims.ElementPadding),
+                    modifier = Modifier.padding(Dims.SmallPadding),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
@@ -171,8 +170,8 @@ fun SettingsScreen(
                         )
                         Text(
                             text = "Configure audio bands and presets",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                         )
                     }
                 }
