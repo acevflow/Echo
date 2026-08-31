@@ -28,6 +28,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
@@ -60,12 +62,12 @@ fun MiniPlayer(
     Surface(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = Dims.SmallPadding, vertical = Dims.TinyPadding)
+            .padding(horizontal = Dims.ElementPadding, vertical = Dims.TinyPadding)
+            .shadow(12.dp, RoundedCornerShape(Dims.CardRadius))
             .clip(RoundedCornerShape(Dims.CardRadius))
             .clickable(onClick = onClick),
-        color = MaterialTheme.colorScheme.surfaceVariant,
-        tonalElevation = 12.dp,
-        shadowElevation = 4.dp
+        color = MaterialTheme.colorScheme.surface,
+        tonalElevation = 0.dp
     ) {
         Column {
             Row(
@@ -76,7 +78,7 @@ fun MiniPlayer(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 val imageModifier = Modifier
-                    .size(48.dp)
+                    .size(52.dp)
                     .clip(RoundedCornerShape(Dims.SmallRadius))
 
                 Box {
@@ -102,8 +104,7 @@ fun MiniPlayer(
                 ) {
                     Text(
                         text = currentMediaItem?.mediaMetadata?.title?.toString() ?: "Unknown",
-                        style = MaterialTheme.typography.bodyLarge,
-                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.titleMedium,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -131,15 +132,23 @@ fun MiniPlayer(
                 }
             }
             
-            LinearProgressIndicator(
-                progress = { progress },
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(2.dp),
-                color = MaterialTheme.colorScheme.primary,
-                trackColor = MaterialTheme.colorScheme.surfaceVariant,
-                strokeCap = StrokeCap.Round
-            )
+                    .padding(horizontal = Dims.SmallPadding)
+                    .padding(bottom = Dims.TinyPadding)
+            ) {
+                LinearProgressIndicator(
+                    progress = { progress },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(3.dp)
+                        .clip(RoundedCornerShape(2.dp)),
+                    color = MaterialTheme.colorScheme.primary,
+                    trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                    strokeCap = StrokeCap.Round
+                )
+            }
         }
     }
 }

@@ -21,8 +21,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.PlaylistAdd
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.MusicNote
+import androidx.compose.ui.text.style.TextAlign
+import com.acevflow.echo.ui.theme.DividerColor
 import androidx.compose.material.icons.filled.Queue
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
@@ -100,15 +104,27 @@ fun LibraryScreen(
                 }
                 LibraryUiState.Empty -> {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(
-                                text = "No music found",
-                                style = MaterialTheme.typography.titleLarge
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier.padding(Dims.ScreenPadding)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.MusicNote,
+                                contentDescription = null,
+                                modifier = Modifier.size(64.dp).padding(bottom = 16.dp),
+                                tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
                             )
                             Text(
-                                text = "Add audio files to your device",
+                                text = "Your library is empty",
+                                style = MaterialTheme.typography.titleLarge,
+                                textAlign = TextAlign.Center
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = "Add music files to your device to start listening.",
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                textAlign = TextAlign.Center
                             )
                         }
                     }
@@ -330,7 +346,7 @@ fun SongList(
                 HorizontalDivider(
                     modifier = Modifier.padding(horizontal = Dims.ElementPadding),
                     thickness = 0.5.dp,
-                    color = MaterialTheme.colorScheme.surfaceVariant
+                    color = DividerColor
                 )
             }
         }

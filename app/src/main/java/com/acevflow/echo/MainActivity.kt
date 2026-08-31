@@ -50,7 +50,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -124,8 +126,8 @@ class MainActivity : ComponentActivity() {
                                         title = { 
                                             Text(
                                                 text = "Echo",
-                                                fontWeight = FontWeight.Bold,
-                                                style = MaterialTheme.typography.titleLarge
+                                                style = MaterialTheme.typography.displayLarge.copy(fontSize = 28.sp),
+                                                color = MaterialTheme.colorScheme.onBackground
                                             ) 
                                         },
                                         actions = {
@@ -164,27 +166,41 @@ class MainActivity : ComponentActivity() {
                                         
                                         val showNavBar = items.any { it.first.route == currentDestination?.route }
                                         if (showNavBar) {
-                                            NavigationBar(
-                                                containerColor = MaterialTheme.colorScheme.background,
-                                                tonalElevation = 0.dp
-                                            ) {
-                                                items.forEach { (screen, label, icon) ->
-                                                    NavigationBarItem(
-                                                        icon = { Icon(icon, contentDescription = null) },
-                                                        label = { Text(label) },
-                                                        selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true,
-                                                        onClick = {
-                                                            navController.navigate(screen.route) {
-                                                                popUpTo(navController.graph.findStartDestination().id) {
-                                                                    saveState = true
-                                                                }
-                                                                launchSingleTop = true
-                                                                restoreState = true
+                                        NavigationBar(
+                                            containerColor = MaterialTheme.colorScheme.background,
+                                            tonalElevation = 0.dp,
+                                            windowInsets = WindowInsets(0)
+                                        ) {
+                                            items.forEach { (screen, label, icon) ->
+                                                val isSelected = currentDestination?.hierarchy?.any { it.route == screen.route } == true
+                                                NavigationBarItem(
+                                                    icon = { 
+                                                        Icon(
+                                                            imageVector = icon, 
+                                                            contentDescription = null,
+                                                            tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                                                        ) 
+                                                    },
+                                                    label = { 
+                                                        Text(
+                                                            text = label,
+                                                            style = MaterialTheme.typography.labelMedium,
+                                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
+                                                        ) 
+                                                    },
+                                                    selected = isSelected,
+                                                    onClick = {
+                                                        navController.navigate(screen.route) {
+                                                            popUpTo(navController.graph.findStartDestination().id) {
+                                                                saveState = true
                                                             }
+                                                            launchSingleTop = true
+                                                            restoreState = true
                                                         }
-                                                    )
-                                                }
+                                                    }
+                                                )
                                             }
+                                        }
                                         }
                                     }
                                 }

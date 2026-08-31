@@ -32,6 +32,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -63,7 +65,7 @@ fun EchoSongItem(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .background(if (isSelected) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f) else MaterialTheme.colorScheme.background)
+            .background(if (isSelected) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f) else Color.Transparent)
             .combinedClickable(
                 onClick = onClick,
                 onLongClick = onLongClick
@@ -74,6 +76,7 @@ fun EchoSongItem(
         Box(contentAlignment = Alignment.Center) {
             val imageModifier = Modifier
                 .size(Dims.ArtworkSmall)
+                .shadow(4.dp, RoundedCornerShape(Dims.SmallRadius))
                 .clip(RoundedCornerShape(Dims.SmallRadius))
             
             AsyncImage(
@@ -112,8 +115,7 @@ fun EchoSongItem(
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = song.title,
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.SemiBold,
+                style = MaterialTheme.typography.titleMedium,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )

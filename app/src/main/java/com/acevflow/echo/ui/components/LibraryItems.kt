@@ -19,6 +19,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -40,20 +42,20 @@ fun EchoAlbumItem(
             modifier = Modifier
                 .fillMaxWidth()
                 .aspectRatio(1f)
+                .shadow(8.dp, RoundedCornerShape(Dims.CardRadius))
                 .clip(RoundedCornerShape(Dims.CardRadius)),
             contentScale = ContentScale.Crop
         )
         Text(
             text = album.title,
-            style = MaterialTheme.typography.bodyLarge,
-            fontWeight = FontWeight.SemiBold,
+            style = MaterialTheme.typography.titleMedium,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.padding(top = Dims.SmallPadding)
         )
         Text(
             text = album.artist,
-            style = MaterialTheme.typography.bodySmall,
+            style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
@@ -74,7 +76,8 @@ fun EchoArtistItem(
     ) {
         Surface(
             modifier = Modifier
-                .size(56.dp)
+                .size(64.dp)
+                .shadow(4.dp, CircleShape)
                 .clip(CircleShape),
             color = MaterialTheme.colorScheme.surfaceVariant
         ) {
@@ -95,14 +98,13 @@ fun EchoArtistItem(
         ) {
             Text(
                 text = artist.name,
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.SemiBold,
+                style = MaterialTheme.typography.titleMedium,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
             Text(
                 text = "${artist.albumCount} albums • ${artist.trackCount} songs",
-                style = MaterialTheme.typography.bodySmall,
+                style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
